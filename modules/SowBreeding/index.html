@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title id="pageTitle">Sow Breeding Records</title>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script src="https://unpkg.com/html5-qrcode"></script>
+
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body id="appBody">
+
+<header>
+    <i class="fas fa-arrow-left" onclick="window.history.back()"></i>
+    <h2 id="appTitle">Sow Breeding Records</h2>
+    <div class="menu-container">
+        <i class="fas fa-ellipsis-v" onclick="toggleMenu()"></i>
+        <div id="dropdownMenu" class="dropdown-content">
+            <button onclick="archiveCompleted()"><i class="fas fa-archive"></i> Archive Completed</button>
+            <button onclick="exportJSON()"><i class="fas fa-download"></i> Backup</button>
+            <button onclick="importJSON()"><i class="fas fa-upload"></i> Restore </button>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+    <div class="view-toggle">
+        <button id="btnActive" class="active" onclick="switchView('active')">Active</button>
+        <button id="btnHistory" onclick="switchView('history')">History Folder</button>
+    </div>
+
+    <div class="search-container">
+        <div class="search-bar">
+            <input id="searchInput" placeholder="Search name or Pen QR..." oninput="render()">
+        </div>
+        <button class="scan-btn" onclick="startScanner('search')">
+            <i class="fas fa-qrcode"></i>
+        </button>
+    </div>
+    
+    <div id="records"></div>
+</div>
+
+<div class="fab" onclick="openAddModal()"><i class="fa fa-plus"></i></div>
+
+<script src="js/script.js"></script>
+</body>
+</html>
