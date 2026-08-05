@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title id="pageTitle">PigletCap Pro</title>
+    <style>
+        :root {
+            --primary: #2563eb; 
+            --success: #16a34a;
+            --danger: #dc2626;
+            --warning: #f59e0b;
+            --dark: #0f172a;
+            --light: #f8fafc;
+        }
+
+        * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+        
+        body { 
+            background-color: var(--light); 
+            margin: 0; 
+            padding: 70px 0 180px 0; 
+            color: var(--dark);
+        }
+
+        /* Top Nav with Logo */
+        .app-nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: 60px;
+            background: white;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            z-index: 1000;
+        }
+
+        .app-nav img {
+            height: 35px;
+            width: 35px;
+            object-fit: contain;
+            margin-right: 12px;
+            border-radius: 6px;
+        }
+
+        .app-nav h1 { font-size: 1.1rem; margin: 0; color: var(--dark); flex-grow: 1; }
+
+        .container { padding: 15px; max-width: 500px; margin: auto; }
+
+        /* Input Cards */
+        .header-card {
+            background: white;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+
+        .input-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        label { font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 5px; }
+        
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        input:focus { border-color: var(--primary); }
+
+        /* Feed Cards */
+        .feed-item {
+            background: white;
+            margin-bottom: 12px;
+            padding: 15px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 5px solid var(--primary);
+        }
+
+        .action-btns { display: flex; gap: 8px; }
+        .btn-icon { border: none; padding: 10px; border-radius: 8px; cursor: pointer; }
+        .btn-edit { background: #fef3c7; color: var(--warning); }
+        .btn-del { background: #fee2e2; color: var(--danger); }
+
+        /* Bottom App Summary */
+        .app-footer {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            background: var(--dark);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 24px 24px 0 0;
+            z-index: 900;
+        }
+
+        .custom-footer-text {
+            font-size: 0.7rem;
+            text-align: center;
+            opacity: 0.5;
+            margin-top: 10px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 8px;
+        }
+
+        .footer-content { display: flex; justify-content: space-between; align-items: center; }
+        .total-val { font-size: 1.5rem; font-weight: 800; color: #4ade80; }
+
+        .btn-add-main {
+            background: var(--primary);
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 16px;
+            border-radius: 12px;
+            font-weight: 700;
+            margin-top: 15px;
+            cursor: pointer;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: white;
+            width: 100%;
+            max-width: 400px;
+            padding: 25px;
+            border-radius: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<nav class="app-nav">
+    <img id="appLogo" src="https://cdn-icons-png.flaticon.com/512/265/265674.png" alt="Logo">
+    <h1 id="appTitle">Farm Pro Calculator</h1>
+</nav>
+
+<div class="container">
+    <div class="header-card">
+        <label>Investment Basics</label>
+        <div class="input-row">
+            <div>
+                <label>No. of Pigs</label>
+                <input type="number" id="pigCount" value="10" oninput="calculate()">
+            </div>
+            <div>
+                <label>Price/Head</label>
+                <input type="number" id="pigPrice" value="2500" oninput="calculate()">
+            </div>
+        </div>
+    </div>
+
+    <div id="feedList"></div>
+    <button class="btn-add-main" onclick="openModal()">+ Add Feed Requirement</button>
+</div>
+
+<div class="modal" id="feedModal">
+    <div class="modal-content">
+        <h3 id="modalTitle">Add Feed Info</h3>
+        <input type="hidden" id="editIndex" value="-1">
+        <label>Feed Name</label>
+        <input type="text" id="newFeedName">
+        <div class="input-row">
+            <div><label>Price/Bag</label><input type="number" id="newFeedPrice"></div>
+            <div><label>Bags/Head</label><input type="number" id="newFeedQty" step="0.1"></div>
+        </div>
+        <button class="btn-add-main" onclick="saveFeed()" id="saveBtn">Save to List</button>
+        <button style="background:none; border:none; width:100%; margin-top:10px; color:#94a3b8;" onclick="closeModal()">Cancel</button>
+    </div>
+</div>
+
+<footer class="app-footer">
+    <div class="footer-content">
+        <div>
+            <span style="font-size: 0.7rem; opacity: 0.7;">GRAND TOTAL</span>
+            <div class="total-val">₱ <span id="grandTotal">0.00</span></div>
+        </div>
+        <div style="text-align: right">
+            <span style="font-size: 0.7rem; opacity: 0.7;">PER HEAD</span>
+            <div style="font-weight: 700;">₱ <span id="perHeadTotal">0.00</span></div>
+        </div>
+    </div>
+    <div class="custom-footer-text" id="appFooterNote">© 2024 Livestock Management System</div>
+</footer>
+
+<script>
+    let feeds = JSON.parse(localStorage.getItem('pigFeeds')) || [];
+
+    // --- RECEIVE DATA FROM URL ---
+    function initExternalConfigs() {
+        const params = new URLSearchParams(window.location.search);
+        
+        // 1. Theme Color
+        const color = params.get('color') || localStorage.getItem('appThemeColor') || '#2563eb';
+        document.documentElement.style.setProperty('--primary', color);
+        localStorage.setItem('appThemeColor', color);
+
+        // 2. Title
+        const title = params.get('title');
+        if(title) {
+            document.getElementById('appTitle').innerText = title;
+            document.title = title;
+        }
+
+        // 3. Logo
+        const logo = params.get('logo');
+        if(logo) document.getElementById('appLogo').src = logo;
+
+        // 4. Footer
+        const footer = params.get('footer');
+        if(footer) document.getElementById('appFooterNote').innerText = footer;
+    }
+
+    // --- APP LOGIC ---
+    function openModal(index = -1) {
+        const modal = document.getElementById('feedModal');
+        if (index > -1) {
+            document.getElementById('modalTitle').innerText = "Edit Feed";
+            document.getElementById('editIndex').value = index;
+            document.getElementById('newFeedName').value = feeds[index].name;
+            document.getElementById('newFeedPrice').value = feeds[index].price;
+            document.getElementById('newFeedQty').value = feeds[index].qty;
+        } else {
+            document.getElementById('modalTitle').innerText = "Add Feed";
+            document.getElementById('editIndex').value = -1;
+            document.querySelectorAll('#feedModal input:not([type="hidden"])').forEach(i => i.value = '');
+        }
+        modal.style.display = 'flex';
+    }
+
+    function closeModal() { document.getElementById('feedModal').style.display = 'none'; }
+
+    function saveFeed() {
+        const index = parseInt(document.getElementById('editIndex').value);
+        const name = document.getElementById('newFeedName').value;
+        const price = parseFloat(document.getElementById('newFeedPrice').value) || 0;
+        const qty = parseFloat(document.getElementById('newFeedQty').value) || 0;
+        if(!name || price <= 0) return;
+        if (index > -1) feeds[index] = {name, price, qty};
+        else feeds.push({name, price, qty});
+        localStorage.setItem('pigFeeds', JSON.stringify(feeds));
+        renderFeeds();
+        closeModal();
+    }
+
+    function removeFeed(index) {
+        if(confirm("Delete this?")) {
+            feeds.splice(index, 1);
+            localStorage.setItem('pigFeeds', JSON.stringify(feeds));
+            renderFeeds();
+        }
+    }
+
+    function renderFeeds() {
+        const list = document.getElementById('feedList');
+        list.innerHTML = '';
+        feeds.forEach((f, i) => {
+            list.innerHTML += `
+                <div class="feed-item">
+                    <div class="feed-info">
+                        <h4>${f.name}</h4>
+                        <p>${f.qty} bag/head @ ₱${f.price.toLocaleString()}</p>
+                    </div>
+                    <div class="action-btns">
+                        <button class="btn-icon btn-edit" onclick="openModal(${i})">✎</button>
+                        <button class="btn-icon btn-del" onclick="removeFeed(${i})">✕</button>
+                    </div>
+                </div>`;
+        });
+        calculate();
+    }
+
+    function calculate() {
+        const count = parseFloat(document.getElementById('pigCount').value) || 0;
+        const pigletPrice = parseFloat(document.getElementById('pigPrice').value) || 0;
+        const feedCostPerHead = feeds.reduce((sum, f) => sum + (f.price * f.qty), 0);
+        const totalPerHead = pigletPrice + feedCostPerHead;
+        document.getElementById('perHeadTotal').innerText = totalPerHead.toLocaleString(undefined, {minimumFractionDigits: 2});
+        document.getElementById('grandTotal').innerText = (totalPerHead * count).toLocaleString(undefined, {minimumFractionDigits: 2});
+    }
+
+    initExternalConfigs();
+    renderFeeds();
+</script>
+</body>
+</html>

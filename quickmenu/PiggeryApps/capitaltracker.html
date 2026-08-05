@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title id="pageTitle">Farm Capital Tracker</title>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script src="https://unpkg.com/html5-qrcode"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+    :root { 
+        --primary: #2563eb; 
+        --bg: #f4f6fb; 
+        --card: #ffffff; 
+        --text: #1f2937; 
+        --border: #e2e8f0; 
+        --shadow: rgba(0,0,0,.06); 
+        --profit: #15803d; 
+        --loss: #ef4444; 
+        --status-open: #3b82f6; 
+        --status-closed: #64748b;
+        --input-bg: #f8fafc;
+    }
+    body.dark { 
+        --bg: #0f172a; 
+        --card: #1e293b; 
+        --text: #e5e7eb; 
+        --border: #334155; 
+        --shadow: rgba(0,0,0,.4);
+        --input-bg: #0f172a;
+    }
+
+    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; transition: background 0.2s, color 0.2s; }
+    body { margin: 0; background: var(--bg); color: var(--text); padding: 70px 0 100px 0; -webkit-tap-highlight-color: transparent; }
+
+    header {
+        height: 60px; background: var(--primary); position: fixed;
+        top: 0; left: 0; right: 0; display: flex; justify-content: space-between;
+        align-items: center; padding: 0 20px; color: #fff; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    header h2 { font-size: 16px; margin: 0; font-weight: 800; text-transform: uppercase; }
+
+    .container { max-width: 500px; margin: auto; padding: 0 16px; }
+
+    .action-menu {
+        display: flex; gap: 8px; margin-bottom: 20px; background: var(--card);
+        padding: 8px; border-radius: 20px; border: 1px solid var(--border);
+        box-shadow: 0 4px 12px var(--shadow);
+    }
+    .menu-btn {
+        flex: 1; height: 48px; border-radius: 14px; border: none;
+        background: var(--bg); color: var(--text); font-size: 10px; font-weight: 800;
+        text-transform: uppercase; display: flex; flex-direction: column; 
+        align-items: center; justify-content: center; gap: 4px; cursor: pointer;
+    }
+    .menu-btn i { font-size: 16px; color: var(--primary); }
+    .menu-btn.scan-btn { background: var(--primary); color: #fff; }
+    .menu-btn.scan-btn i { color: #fff; }
+
+    .grand-summary { 
+        background: var(--card); border-radius: 28px; padding: 24px; 
+        text-align: center; margin-bottom: 20px; border: 1px solid var(--border);
+        box-shadow: 0 10px 30px var(--shadow);
+    }
+
+    .chart-card {
+        background: var(--card); border-radius: 24px; padding: 20px;
+        margin-bottom: 24px; border: 1px solid var(--border);
+        box-shadow: 0 4px 15px var(--shadow); height: 230px; display: none;
+    }
+
+    .record { margin-bottom: 16px; background: var(--card); border-radius: 22px; border: 1px solid var(--border); overflow: hidden; box-shadow: 0 4px 6px var(--shadow); }
+    .record-header { padding: 18px; cursor: pointer; border-left: 8px solid var(--primary); }
+    .record.closed .record-header { border-left-color: var(--status-closed); }
+    
+    .badge { font-size: 10px; font-weight: 800; padding: 6px 12px; border-radius: 10px; text-transform: uppercase; margin-top: 8px; display: inline-block; }
+    .badge-status { background: rgba(59, 130, 246, 0.12); color: var(--status-open); }
+    .badge-closed { background: rgba(100, 116, 139, 0.12); color: var(--status-closed); }
+    .badge-investment { background: var(--bg); color: var(--text); }
+    .badge-profit { background: #dcfce7; color: var(--profit); }
+    .badge-loss { background: #fee2e2; color: var(--loss); }
+
+    .record-details { display: none; padding: 16px; border-top: 1px solid var(--border); background: rgba(0,0,0,0.01); }
+    .record.active .record-details { display: block; }
+
+    .native-form-group { margin-bottom: 16px; }
+    .native-label { font-size: 11px; font-weight: 800; color: var(--primary); text-transform: uppercase; margin-bottom: 6px; display: block; padding-left: 4px; }
+    .native-input { 
+        width: 100% !important; height: 56px !important; background: var(--input-bg) !important;
+        border: 2px solid var(--border) !important; border-radius: 16px !important;
+        padding: 0 16px !important; font-size: 16px !important; color: var(--text) !important;
+        margin: 0 !important; outline: none !important;
+    }
+    textarea.native-input { height: 100px !important; padding: 12px 16px !important; resize: none; }
+
+    .btn-action { 
+        width: 100%; height: 56px; margin-top: 12px; border-radius: 18px; 
+        background: var(--primary); color: white; border: none; font-size: 14px; 
+        font-weight: 800; cursor: pointer; text-transform: uppercase;
+        display: flex; align-items: center; justify-content: center; gap: 10px;
+    }
+    .btn-close-record { background: #1e293b; }
+    .btn-delete-main { background: #fee2e2; color: #ef4444; border: 1px solid #fecaca; margin-top: 20px; }
+
+    .remarks-box { margin-top: 15px; padding: 14px; background: var(--bg); border-radius: 14px; border-left: 4px solid var(--status-closed); }
+
+    #reader, #reader-mini { width: 100%; border-radius: 24px; overflow: hidden; display: none; margin-bottom: 15px; border: 2px solid var(--primary); }
+    
+    .scan-trigger-btn {
+        width: 100%; height: 54px; background: var(--input-bg); border: 2px dashed var(--border);
+        border-radius: 16px; margin-top: 8px; display: flex; align-items: center;
+        justify-content: center; gap: 10px; color: var(--text); font-weight: 700; font-size: 14px;
+    }
+
+    .fab { 
+        position: fixed; bottom: 30px; right: 25px; width: 64px; height: 64px; 
+        border-radius: 22px; background: var(--primary); color: white; 
+        display: flex; justify-content: center; align-items: center; 
+        font-size: 28px; box-shadow: 0 8px 24px rgba(37,99,235,0.4); z-index: 10; 
+    }
+</style>
+</head>
+<body>
+
+<header>
+    <i class="fas fa-chevron-left" onclick="window.history.back()"></i>
+    <h2 id="appTitleDisplay">Farm Manager</h2>
+    <div style="width: 20px;"></div>
+</header>
+
+<div class="container">
+    <div class="action-menu">
+        <button class="menu-btn scan-btn" onclick="startScanner('search')">
+            <i class="fas fa-qrcode"></i> Scan QR
+        </button>
+        <button class="menu-btn" onclick="exportData()">
+            <i class="fas fa-download"></i> Backup
+        </button>
+        <button class="menu-btn" onclick="document.getElementById('importFile').click()">
+            <i class="fas fa-upload"></i> Restore
+        </button>
+        <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+    </div>
+
+    <div id="reader"></div>
+    
+    <div class="chart-card" id="chartBox">
+        <p style="font-size: 10px; font-weight: 800; opacity: 0.6; text-transform: uppercase; margin: 0 0 10px 0;">Performance Summary</p>
+        <canvas id="financeChart"></canvas>
+    </div>
+
+    <div class="grand-summary">
+        <p style="font-size: 11px; font-weight: 800; opacity: 0.6; text-transform: uppercase;">Active Capital Investment</p>
+        <h1 id="grandTotalDisplay" style="margin: 0; font-size: 34px; font-weight: 900; color: var(--primary);">₱0.00</h1>
+    </div>
+
+    <div id="recordsList"></div>
+</div>
+
+<div class="fab" onclick="showRecordModal()"><i class="fa fa-plus"></i></div>
+
+<script>
+    let records = JSON.parse(localStorage.getItem("farm_combined_ledger")) || [];
+    let h5qr = null;
+    let mainChart = null;
+
+    function syncTheme() {
+        const appearance = JSON.parse(localStorage.getItem('appearance')) || {};
+        const theme = localStorage.getItem('theme') || 'light';
+        document.documentElement.style.setProperty('--primary', appearance.color || '#2563eb');
+        document.body.classList.toggle('dark', theme === 'dark');
+        document.getElementById('appTitleDisplay').textContent = appearance.appTitle || 'Farm Manager';
+    }
+    window.addEventListener('storage', syncTheme);
+    syncTheme();
+
+    function save() {
+        localStorage.setItem("farm_combined_ledger", JSON.stringify(records));
+        render();
+    }
+
+    function updateChart() {
+        const ctx = document.getElementById('financeChart').getContext('2d');
+        let tProfit = 0, tLoss = 0;
+        records.filter(r => r.status === 'closed').forEach(r => {
+            const cost = (r.ledger || []).reduce((s, i) => s + i.total, 0);
+            const diff = (r.sales || 0) - cost;
+            if(diff >= 0) tProfit += diff; else tLoss += Math.abs(diff);
+        });
+        if (mainChart) mainChart.destroy();
+        if (tProfit > 0 || tLoss > 0) {
+            document.getElementById('chartBox').style.display = 'block';
+            mainChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Profit', 'Loss'],
+                    datasets: [{ data: [tProfit, tLoss], backgroundColor: ['#15803d', '#ef4444'], borderRadius: 8 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            });
+        } else { document.getElementById('chartBox').style.display = 'none'; }
+    }
+
+    function exportData() {
+        const dataStr = JSON.stringify(records, null, 2);
+        const blob = new Blob([dataStr], {type: "application/json"});
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `Farm_Ledger_Backup.json`;
+        link.click();
+    }
+
+    function importData(event) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const imported = JSON.parse(e.target.result);
+                if(Array.isArray(imported)) {
+                    Swal.fire({ title: 'Restore All?', text: "Data will be updated.", icon: 'warning', showCancelButton: true }).then(res => { if(res.isConfirmed) { records = imported; save(); } });
+                }
+            } catch(err) { Swal.fire('Error','Invalid File','error'); }
+        };
+        reader.readAsText(event.target.files[0]);
+    }
+
+    function render() {
+        const list = document.getElementById("recordsList");
+        list.innerHTML = "";
+        let activeInvestment = 0;
+
+        records.forEach((r, i) => {
+            const expenses = (r.ledger || []).reduce((sum, item) => sum + item.total, 0);
+            const isClosed = r.status === 'closed';
+            const profit = (r.sales || 0) - expenses;
+            if(!isClosed) activeInvestment += expenses;
+
+            const card = document.createElement("div");
+            card.id = `record-${r.qrID}`;
+            card.className = `record ${r.expanded ? 'active' : ''} ${isClosed ? 'closed' : ''}`;
+            
+            card.innerHTML = `
+                <div class="record-header" onclick="toggleRecord(${i})">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div><strong style="font-size:18px;">${r.title}</strong><br>
+                        ${isClosed ? `<span class="badge badge-closed">CLOSED</span> <span class="badge ${profit >= 0 ? 'badge-profit' : 'badge-loss'}">₱${Math.abs(profit).toLocaleString()}</span>` : `<span class="badge badge-status">ACTIVE</span> <span class="badge badge-investment">COST: ₱${expenses.toLocaleString()}</span>`}
+                        </div>
+                        <i class="fas fa-ellipsis-v opacity-40" onclick="editMainRecord(event, ${i})" style="padding: 12px;"></i>
+                    </div>
+                </div>
+                <div class="record-details">
+                    <div id="ledger-${i}">
+                        ${(r.ledger || []).map((item, idx) => `
+                            <div style="display: flex; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid var(--border);">
+                                <div>
+                                    <span style="font-size:10px; font-weight:900; color:var(--primary); background:rgba(37,99,235,0.1); padding:2px 6px; border-radius:4px; text-transform:uppercase;">${item.date || 'No Date'}</span>
+                                    <div style="margin-top:6px;"><b>${item.desc}</b></div>
+                                    <small style="opacity:0.6;">${item.qty}${item.unit} @ ₱${item.price}</small>
+                                </div>
+                                <div style="text-align:right">
+                                    <b>₱${item.total.toLocaleString()}</b><br>
+                                    <div style="display:flex; gap:15px; justify-content:flex-end; margin-top:5px;">
+                                        <i class="fas fa-pen" onclick="openExpenseModal(${i}, ${idx})" style="font-size:12px; color:var(--primary); cursor:pointer;"></i>
+                                        <i class="fas fa-trash-alt" onclick="deleteEntry(${i}, ${idx})" style="font-size:12px; color:var(--loss); cursor:pointer;"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    ${isClosed && r.remarks ? `
+                        <div class="remarks-box">
+                            <span style="font-size:10px; font-weight:900; opacity:0.6; text-transform:uppercase;">Closing Remarks</span>
+                            <div style="font-size:13px; margin-top:4px;">${r.remarks}</div>
+                        </div>
+                    ` : ''}
+
+                    ${!isClosed ? `
+                        <button class="btn-action" onclick="openExpenseModal(${i})"><i class="fas fa-plus-circle"></i> ADD EXPENSE</button>
+                        <button class="btn-action btn-close-record" onclick="closeRecordPrompt(${i})"><i class="fas fa-check-circle"></i> CLOSE & SALE</button>
+                    ` : `<button class="btn-action" style="background:var(--status-closed)" onclick="reopenRecord(${i})">RE-OPEN</button>`}
+                    
+                    <button class="btn-action btn-delete-main" onclick="deleteRecord(${i})">
+                        <i class="fas fa-trash-alt"></i> DELETE THIS BATCH
+                    </button>
+                </div>
+            `;
+            list.appendChild(card);
+        });
+        document.getElementById('grandTotalDisplay').textContent = `₱${activeInvestment.toLocaleString()}`;
+        updateChart();
+    }
+
+    async function closeRecordPrompt(index) {
+        const { value: res } = await Swal.fire({
+            title: 'Finalize Sale',
+            html: `
+                <div style="text-align:left">
+                    <div class="native-form-group">
+                        <label class="native-label">Total Sale Price (₱)</label>
+                        <input id="s-price" type="number" class="native-input" placeholder="0.00">
+                    </div>
+                    <div class="native-form-group">
+                        <label class="native-label">Closing Remarks</label>
+                        <textarea id="s-remarks" class="native-input" placeholder="e.g. Sold to Mr. Tan, 85kg total weight..."></textarea>
+                    </div>
+                </div>`,
+            showCancelButton: true,
+            confirmButtonText: 'CLOSE BATCH',
+            preConfirm: () => {
+                const sale = document.getElementById('s-price').value;
+                if(!sale) return Swal.showValidationMessage('Sale price is required');
+                return { 
+                    sale: parseFloat(sale), 
+                    remarks: document.getElementById('s-remarks').value 
+                };
+            }
+        });
+
+        if (res) {
+            records[index].sales = res.sale;
+            records[index].remarks = res.remarks;
+            records[index].status = 'closed';
+            save();
+        }
+    }
+
+    async function deleteEntry(recordIdx, itemIdx) {
+        const result = await Swal.fire({
+            title: 'Delete Entry?',
+            text: "This expense will be removed.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444'
+        });
+        if (result.isConfirmed) {
+            records[recordIdx].ledger.splice(itemIdx, 1);
+            save();
+        }
+    }
+
+    async function deleteRecord(i) { 
+        const result = await Swal.fire({ 
+            title: 'Delete Whole Batch?', 
+            text: "This action cannot be undone.",
+            icon: 'error',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444'
+        });
+        if (result.isConfirmed) {
+            records.splice(i,1); 
+            save(); 
+        }
+    }
+
+    async function openExpenseModal(recordIndex, itemIndex = null) {
+        const isEditing = itemIndex !== null;
+        const data = isEditing ? records[recordIndex].ledger[itemIndex] : { 
+            date: new Date().toISOString().split('T')[0], 
+            desc: '', qty: '', price: '', unit: 'kg' 
+        };
+
+        await Swal.fire({
+            title: isEditing ? 'Edit Expense' : 'Add Expense',
+            html: `
+                <div style="text-align:left">
+                    <div class="native-form-group"><label class="native-label">Date</label><input id="f-date" type="date" class="native-input" value="${data.date}"></div>
+                    <div class="native-form-group"><label class="native-label">Item</label><input id="f-desc" class="native-input" value="${data.desc}"></div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                        <div class="native-form-group"><label class="native-label">Qty</label><input id="f-qty" type="number" value="${data.qty}" class="native-input"></div>
+                        <div class="native-form-group"><label class="native-label">Price</label><input id="f-price" type="number" value="${data.price}" class="native-input"></div>
+                    </div>
+                    <div class="native-form-group">
+                        <label class="native-label">Unit</label>
+                        <select id="f-unit" class="native-input">
+                            <option value="kg" ${data.unit==='kg'?'selected':''}>kg</option>
+                            <option value="pigs" ${data.unit==='pigs'?'selected':''}>piglets</option>
+                            <option value="sk" ${data.unit==='sk'?'selected':''}>sack</option>
+                        </select>
+                    </div>
+                </div>`,
+            preConfirm: () => {
+                const q = parseFloat(document.getElementById('f-qty').value) || 0;
+                const p = parseFloat(document.getElementById('f-price').value) || 0;
+                const item = { 
+                    date: document.getElementById('f-date').value, 
+                    desc: document.getElementById('f-desc').value, 
+                    qty: q, price: p, unit: document.getElementById('f-unit').value, 
+                    total: q * p 
+                };
+                if (isEditing) records[recordIndex].ledger[itemIndex] = item; else records[recordIndex].ledger.push(item);
+                save();
+            }
+        });
+    }
+
+    async function showRecordModal(index = null) {
+        const isEditing = index !== null;
+        const data = isEditing ? records[index] : { title: '', qrID: '' };
+        await Swal.fire({
+            title: isEditing ? 'Edit Batch' : 'New Batch',
+            html: `<div style="text-align:left"><div id="reader-mini"></div><div class="native-form-group"><label class="native-label">Batch Name</label><input id="sw-name" class="native-input" value="${data.title}"></div><div class="native-form-group"><label class="native-label">QR Tag</label><input id="sw-qr" class="native-input" value="${data.qrID}"></div><button type="button" class="scan-trigger-btn" onclick="startScanner('input')">SCAN QR</button></div>`,
+            preConfirm: () => {
+                const title = document.getElementById('sw-name').value;
+                if(!title) return Swal.showValidationMessage('Name required');
+                if (isEditing) { records[index].title = title; records[index].qrID = document.getElementById('sw-qr').value; }
+                else { records.unshift({ title, qrID: document.getElementById('sw-qr').value, ledger: [], status: 'active', expanded: false, sales: 0, remarks: '' }); }
+                save();
+            }
+        });
+    }
+
+    async function startScanner(target) {
+        const isInput = target === 'input';
+        const readerId = isInput ? "reader-mini" : "reader";
+        document.getElementById(readerId).style.display = 'block';
+        h5qr = new Html5Qrcode(readerId);
+        h5qr.start({ facingMode: "environment" }, { fps: 15, qrbox: 220 }, (txt) => {
+            if (isInput) document.getElementById('sw-qr').value = txt; else search(txt);
+            h5qr.stop(); document.getElementById(readerId).style.display = 'none';
+        });
+    }
+
+    function search(txt) {
+        const idx = records.findIndex(r => r.qrID === txt);
+        if (idx !== -1) { records.forEach(r => r.expanded = false); records[idx].expanded = true; render(); document.getElementById(`record-${txt}`).scrollIntoView(); }
+    }
+    function toggleRecord(i) { records[i].expanded = !records[i].expanded; render(); }
+    function editMainRecord(e, i) { e.stopPropagation(); showRecordModal(i); }
+    function reopenRecord(i) { records[i].status = 'active'; save(); }
+    
+    render();
+</script>
+</body>
+</html>

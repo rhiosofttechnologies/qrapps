@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Sow Farrowing Pro</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://unpkg.com/html5-qrcode"></script>
+
+<style>
+/* --- THEME SYNC VARIABLES --- */
+:root {
+    --primary: #2563eb; 
+    --primary-light: rgba(37, 99, 235, 0.1);
+    --bg: #f8fafc;
+    --card: #ffffff;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --border: #e2e8f0;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --radius: 20px;
+    --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+}
+
+body.dark {
+    --bg: #0f172a;
+    --card: #1e293b;
+    --text-main: #f1f5f9;
+    --text-muted: #94a3b8;
+    --border: #334155;
+    --shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; transition: background 0.3s, color 0.3s, border-color 0.3s; }
+
+body {
+    margin: 0; font-family: 'Segoe UI', system-ui, sans-serif;
+    background-color: var(--bg); color: var(--text-main);
+    padding-bottom: 100px;
+}
+
+/* Header & Search */
+.app-header { background: var(--card); padding: 20px 16px; position: sticky; top: 0; z-index: 100; box-shadow: var(--shadow); }
+.app-header h2 { margin: 0 0 15px 0; font-size: 20px; display: flex; align-items: center; gap: 10px; color: var(--primary); }
+.search-container { display: flex; gap: 8px; }
+.search-wrapper { position: relative; flex: 1; }
+.search-wrapper i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
+.search-bar { width: 100%; padding: 12px 12px 12px 40px; border-radius: 14px; border: 1px solid var(--border); background: var(--bg); color: var(--text-main); font-size: 15px; }
+.qr-scan-btn { background: var(--primary); color: white; border: none; width: 45px; height: 45px; border-radius: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+
+/* QR Overlay */
+#qr-reader-container { position: fixed; inset: 0; background: #000; z-index: 3000; display: none; flex-direction: column; align-items: center; justify-content: center; }
+#qr-reader { width: 100%; max-width: 400px; border-radius: 15px; overflow: hidden; }
+
+.container { max-width: 520px; margin: auto; padding: 12px; }
+
+/* Sow Card */
+.sow-card { background: var(--card); border-radius: var(--radius); margin-bottom: 16px; box-shadow: var(--shadow); border: 1px solid var(--border); overflow: hidden; }
+.sow-header { padding: 18px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+.qr-tag-label { font-size: 10px; color: var(--primary); font-weight: bold; background: var(--primary-light); padding: 2px 6px; border-radius: 4px; margin-top: 4px; display: inline-block; }
+
+.quick-stats { display: grid; grid-template-columns: repeat(5, 1fr); background: var(--bg); padding: 12px; margin: 0 12px 12px; border-radius: 12px; gap: 5px; text-align: center; }
+.stat-item label { display: block; font-size: 8px; color: var(--text-muted); font-weight: bold; }
+.stat-item value { font-weight: 800; font-size: 13px; }
+
+.sow-body { display: none; padding: 16px; border-top: 1px solid var(--border); }
+.section-label { font-size: 14px; font-weight: 800; margin: 20px 0 10px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 5px; }
+.add-inline-btn { background: var(--primary); color: #fff; border: none; padding: 4px 10px; border-radius: 8px; font-size: 10px; cursor: pointer; }
+
+/* Notes Grid */
+.notes-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.note-item { padding: 12px; border-radius: 15px; font-size: 11px; position: relative; border: 1px solid rgba(0,0,0,0.05); min-height: 80px; }
+.note-item b { display: block; margin-bottom: 4px; border-bottom: 1px solid rgba(0,0,0,0.05); }
+.note-actions { position: absolute; top: 5px; right: 5px; display: flex; gap: 5px; }
+.note-actions i { color: var(--danger); font-size: 12px; padding: 5px; cursor: pointer; }
+
+/* History Logs */
+.record-pill { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 10px; margin-bottom: 8px; font-size: 11px; }
+
+/* Modals */
+.overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); display: none; z-index: 2000; }
+.overlay.active { display: block; }
+.modal { position: fixed; left: 0; right: 0; bottom: -100%; background: var(--card); border-radius: 25px 25px 0 0; padding: 25px; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 2010; max-width: 520px; margin: auto; overflow-y: auto; max-height: 90vh; }
+.modal.active { bottom: 0; }
+.input-group { margin-bottom: 12px; }
+.input-group label { font-size: 11px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 5px; }
+input, textarea { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg); color: var(--text-main); font-size: 14px; }
+.primary-btn { width: 100%; padding: 15px; border: none; border-radius: 15px; background: var(--primary); color: #fff; font-weight: 700; margin-top: 10px; cursor: pointer; }
+
+.fab { position: fixed; right: 20px; bottom: 25px; width: 60px; height: 60px; border-radius: 50%; border: none; background: var(--primary); color: #fff; font-size: 24px; box-shadow: 0 8px 20px rgba(0,0,0,0.2); z-index: 1000; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+
+/* Empty State */
+.empty-state { text-align: center; padding: 60px 20px; color: var(--text-muted); }
+.empty-state i { font-size: 46px; color: var(--border); margin-bottom: 16px; display: block; }
+.empty-state h3 { margin: 0 0 6px; font-size: 16px; color: var(--text-main); }
+.empty-state p { margin: 0; font-size: 13px; }
+</style>
+</head>
+<body>
+
+<div id="qr-reader-container">
+    <i class="fas fa-times" onclick="stopScanner()" style="position:absolute; top:20px; right:20px; color:white; font-size:30px; z-index:3001; cursor:pointer;"></i>
+    <div id="qr-reader"></div>
+    <p style="color:white; margin-top:15px; font-family:sans-serif;">Scan QR Code</p>
+</div>
+
+<div class="app-header">
+    <div style="display:flex; align-items:center; gap:10px;">
+        <i class="fas fa-arrow-left" onclick="window.history.back()" style="cursor:pointer"></i>
+        <h2><i class="fa-solid fa-piggy-bank"></i> Sow Farrowing Pro</h2>
+    </div>
+    <div class="search-container">
+        <div class="search-wrapper">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="searchInput" class="search-bar" placeholder="Search name or Scan QR..." oninput="render()">
+        </div>
+        <button class="qr-scan-btn" onclick="startScanner('search')"><i class="fas fa-qrcode"></i></button>
+    </div>
+</div>
+
+<div class="container" id="sowList"></div>
+
+<button class="fab" onclick="openAddModal()"><i class="fa-solid fa-plus"></i></button>
+
+<div class="overlay" id="overlay" onclick="closeModal()"></div>
+
+<div class="modal" id="recordModal">
+    <h3 style="margin-top:0">Sow Record</h3>
+    <div class="input-group">
+        <label>QR ID / TAG DEFINITION</label>
+        <div style="display:flex; gap:8px;">
+            <input id="qrId" placeholder="Scan or type QR ID">
+            <button onclick="startScanner('input')" style="padding:0 15px; border-radius:10px; border:1px solid var(--border); color:var(--primary); background:var(--bg); cursor:pointer"><i class="fas fa-camera"></i></button>
+        </div>
+    </div>
+    <div class="input-group"><label>SOW NAME</label><input id="sowName" placeholder="e.g. Sow-A1"></div>
+    <div class="input-group"><label>DATE FARROWED</label><input id="bornDate" type="date"></div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px">
+        <div class="input-group"><label>PARITY</label><input id="parity" type="number"></div>
+        <div class="input-group"><label>BORN ALIVE</label><input id="alive" type="number"></div>
+    </div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px">
+        <div class="input-group"><label>STILLBIRTH</label><input id="still" type="number"></div>
+        <div class="input-group"><label>MUMMIFIED</label><input id="mummified" type="number" placeholder="0"></div>
+    </div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px">
+        <div class="input-group"><label>WEAN</label><input id="wean" type="number"></div>
+        <div class="input-group"><label>DEATHS</label><input id="deaths" type="number"></div>
+    </div>
+    <button class="primary-btn" onclick="saveRecord()">Save Sow Data</button>
+</div>
+
+<div class="modal" id="noteModal">
+    <h3 id="noteModalTitle" style="margin-top:0">Add Note</h3>
+    <div class="input-group"><label>DATE</label><input id="noteDate" type="date"></div>
+    <div class="input-group"><label>DETAILS</label><textarea id="noteText" rows="3"></textarea></div>
+    <button class="primary-btn" onclick="saveNote()">Save Note</button>
+</div>
+
+<script>
+let data = JSON.parse(localStorage.getItem("sowData")) || {};
+let html5QrCode, activeScanTarget, editSowKey, currentSow, editNoteIdx, isPigletNote;
+const noteColors = ["#FEF9C3", "#DCFCE7", "#DBEAFE", "#FEE2E2", "#F3E8FF"];
+
+/* --- THEME SYNC ENGINE --- */
+function applyTheme() {
+    const theme = localStorage.getItem('theme');
+    const appearance = JSON.parse(localStorage.getItem('appearance')) || {};
+    
+    if (theme === 'dark') document.body.classList.add('dark');
+    else document.body.classList.remove('dark');
+    
+    if (appearance.color) {
+        document.documentElement.style.setProperty('--primary', appearance.color);
+        document.documentElement.style.setProperty('--primary-light', appearance.color + '1A');
+    }
+}
+// Listen to focus and changes from main app
+window.addEventListener('focus', applyTheme);
+setInterval(applyTheme, 1000); // Polling for fast sync
+applyTheme();
+
+/* --- QR LOGIC --- */
+function startScanner(target) {
+    activeScanTarget = target;
+    document.getElementById('qr-reader-container').style.display = 'flex';
+    html5QrCode = new Html5Qrcode("qr-reader");
+    html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (text) => {
+        if(activeScanTarget === 'search') { document.getElementById('searchInput').value = text; render(); }
+        else { document.getElementById('qrId').value = text; }
+        stopScanner();
+    }).catch(() => {
+        Swal.fire("Camera Error", "Check permissions or use HTTPS", "error");
+        stopScanner();
+    });
+}
+
+function stopScanner() {
+    if(html5QrCode) {
+        html5QrCode.stop().then(() => { 
+            document.getElementById('qr-reader-container').style.display = 'none'; 
+            html5QrCode = null;
+        });
+    } else {
+        document.getElementById('qr-reader-container').style.display = 'none';
+    }
+}
+
+/* --- CRUD LOGIC --- */
+function saveRecord() {
+    const name = document.getElementById('sowName').value;
+    if(!name) return Swal.fire("Required", "Sow Name is needed", "warning");
+    
+    const r = {
+        qrId: document.getElementById('qrId').value,
+        bornDate: document.getElementById('bornDate').value,
+        parity: document.getElementById('parity').value,
+        alive: document.getElementById('alive').value,
+        still: document.getElementById('still').value,
+        mummified: document.getElementById('mummified').value || 0,
+        wean: document.getElementById('wean').value,
+        deaths: document.getElementById('deaths').value
+    };
+
+    if(editSowKey) {
+        if(name !== editSowKey) { data[name] = data[editSowKey]; delete data[editSowKey]; }
+        data[name].records[data[name].records.length-1] = r;
+    } else {
+        data[name] = data[name] || { records: [], notes: [], pigletNotes: [] };
+        data[name].records.push(r);
+        addDefaultPiglets(name, r.bornDate);
+    }
+    localStorage.setItem("sowData", JSON.stringify(data));
+    closeModal(); render();
+}
+
+function addDefaultPiglets(sow, bDay) {
+    if(!bDay) return;
+    const add = (days) => { let d = new Date(bDay); d.setDate(d.getDate()+days); return d.toISOString().split('T')[0]; };
+    data[sow].pigletNotes = [
+        {date: add(3), text: "Iron 1st Dose", bg: "#FEF9C3"},
+        {date: add(10), text: "B-Complex", bg: "#DCFCE7"},
+        {date: add(14), text: "Iron 2nd Dose", bg: "#DBEAFE"}
+    ];
+}
+
+/* --- NOTE/MEDICAL LOGIC --- */
+function openNoteModal(s, isP, idx = null) {
+    currentSow = s; isPigletNote = isP; editNoteIdx = idx;
+    const n = idx !== null ? (isP ? data[s].pigletNotes[idx] : data[s].notes[idx]) : null;
+    document.getElementById('noteDate').value = n ? n.date : new Date().toISOString().split('T')[0];
+    document.getElementById('noteText').value = n ? n.text : "";
+    document.getElementById('noteModalTitle').innerText = isP ? "Piglet Program" : "Medical Record";
+    noteModal.classList.add('active'); overlay.classList.add('active');
+}
+
+function saveNote() {
+    const target = isPigletNote ? 'pigletNotes' : 'notes';
+    const n = { 
+        date: document.getElementById('noteDate').value, 
+        text: document.getElementById('noteText').value, 
+        bg: noteColors[Math.floor(Math.random()*5)],
+        color: "#1e293b" 
+    };
+    if(editNoteIdx !== null) data[currentSow][target][editNoteIdx] = n;
+    else data[currentSow][target].push(n);
+    localStorage.setItem("sowData", JSON.stringify(data));
+    closeModal(); render();
+}
+
+function deleteNote(s, isP, idx, e) {
+    e.stopPropagation();
+    Swal.fire({title: 'Delete this note?', icon: 'warning', showCancelButton: true}).then(res => {
+        if(res.isConfirmed) {
+            const target = isP ? 'pigletNotes' : 'notes';
+            data[s][target].splice(idx, 1);
+            localStorage.setItem("sowData", JSON.stringify(data));
+            render();
+        }
+    });
+}
+
+/* --- UI RENDER --- */
+function render() {
+    const q = document.getElementById("searchInput").value.toLowerCase();
+    const list = document.getElementById("sowList"); list.innerHTML = "";
+    let shown = 0;
+    Object.keys(data).reverse().forEach(s => {
+        const latest = data[s].records.at(-1) || {};
+        const nameMatch = s.toLowerCase().includes(q);
+        const qrMatch = latest.qrId && latest.qrId.toLowerCase().includes(q);
+
+        if(nameMatch || qrMatch) {
+            shown++;
+            const id = "s" + s.replace(/\W/g, "");
+            list.innerHTML += `
+            <div class="sow-card">
+                <div class="sow-header" onclick="toggle('${id}')">
+                    <div><b>${s}</b><br>${latest.qrId ? `<span class="qr-tag-label"><i class="fas fa-tag"></i> ${latest.qrId}</span>` : ''}</div>
+                    <div class="status-badge" style="background:var(--primary-light); color:var(--primary); padding:4px 10px; border-radius:10px; font-size:11px;">Parity ${latest.parity||0}</div>
+                </div>
+                <div class="quick-stats">
+                    <div class="stat-item"><label>ALIVE</label><value>${latest.alive||0}</value></div>
+                    <div class="stat-item"><label>STILL</label><value>${latest.still||0}</value></div>
+                    <div class="stat-item"><label>MUMMY</label><value style="color:var(--warning)">${latest.mummified||0}</value></div>
+                    <div class="stat-item"><label>WEAN</label><value>${latest.wean||0}</value></div>
+                    <div class="stat-item"><label>DEATH</label><value style="color:var(--danger)">${latest.deaths||0}</value></div>
+                </div>
+                <div class="sow-body" id="${id}">
+                    <div style="display:flex; gap:10px; margin-bottom:15px;">
+                        <button class="primary-btn" onclick="editSow('${s}')" style="margin:0; font-size:12px; padding:10px; flex:1">Edit Sow</button>
+                        <button class="primary-btn" onclick="deleteSow('${s}')" style="margin:0; font-size:12px; padding:10px; background:var(--danger); flex:1">Delete Sow</button>
+                    </div>
+
+                    <div class="section-label">History Logs</div>
+                    ${data[s].records.map(r => `
+                        <div class="record-pill">
+                            <b>${r.bornDate || 'No Date'}</b> | P${r.parity} | A:${r.alive} S:${r.still} M:${r.mummified}
+                        </div>
+                    `).join('')}
+
+                    <div class="section-label">Medical Records <button class="add-inline-btn" onclick="openNoteModal('${s}', false)">+ Add</button></div>
+                    <div class="notes-grid">${data[s].notes.map((n, i) => `<div class="note-item" style="background:${n.bg}; color:#1e293b" onclick="openNoteModal('${s}', false, ${i})"><div class="note-actions"><i class="fas fa-trash" onclick="deleteNote('${s}', false, ${i}, event)"></i></div><b>${n.date}</b>${n.text}</div>`).join('')}</div>
+                    
+                    <div class="section-label">Piglet Program <button class="add-inline-btn" onclick="openNoteModal('${s}', true)">+ Add</button></div>
+                    <div class="notes-grid">${data[s].pigletNotes.map((n, i) => `<div class="note-item" style="background:${n.bg}; color:#1e293b" onclick="openNoteModal('${s}', true, ${i})"><div class="note-actions"><i class="fas fa-trash" onclick="deleteNote('${s}', true, ${i}, event)"></i></div><b>${n.date}</b>${n.text}</div>`).join('')}</div>
+                </div>
+            </div>`;
+        }
+    });
+
+    if(shown === 0) {
+        const noDataAtAll = Object.keys(data).length === 0;
+        list.innerHTML = noDataAtAll
+            ? `<div class="empty-state">
+                 <i class="fa-solid fa-piggy-bank"></i>
+                 <h3>No sows added yet</h3>
+                 <p>Tap the + button to add your first sow record.</p>
+               </div>`
+            : `<div class="empty-state">
+                 <i class="fa-solid fa-magnifying-glass"></i>
+                 <h3>No matches found</h3>
+                 <p>Try a different name or QR code.</p>
+               </div>`;
+    }
+}
+
+function toggle(id){ const el=document.getElementById(id); el.style.display=el.style.display==='block'?'none':'block'; }
+function closeModal(){ overlay.classList.remove('active'); recordModal.classList.remove('active'); noteModal.classList.remove('active'); }
+function openAddModal(){ editSowKey=null; document.querySelectorAll('#recordModal input').forEach(i=>i.value=""); recordModal.classList.add('active'); overlay.classList.add('active'); }
+function editSow(s){ editSowKey=s; const r=data[s].records.at(-1); document.getElementById('qrId').value=r.qrId || ""; document.getElementById('sowName').value=s; document.getElementById('bornDate').value=r.bornDate; document.getElementById('parity').value=r.parity; document.getElementById('alive').value=r.alive; document.getElementById('still').value=r.still; document.getElementById('mummified').value=r.mummified; document.getElementById('wean').value=r.wean; document.getElementById('deaths').value=r.deaths; recordModal.classList.add('active'); overlay.classList.add('active'); }
+function deleteSow(s){ Swal.fire({title: 'Delete '+s+'?', text: "All history will be lost!", icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444'}).then(res => { if(res.isConfirmed){ delete data[s]; localStorage.setItem("sowData", JSON.stringify(data)); render(); }}); }
+
+render();
+</script>
+</body>
+</html>

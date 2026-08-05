@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="pageTitle">FarmTag Pro | Universal Module</title>
+    <script type="text/javascript" src="https://unpkg.com/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <style>
+        :root { --primary: #2563eb; --bg: #f4f6fb; --card: #ffffff; --text: #1f2937; }
+        body.dark { --bg: #0f172a; --card: #1e293b; --text: #e5e7eb; }
+        body { background-color: var(--bg); color: var(--text); transition: background 0.3s ease; }
+        .farm-card { background-color: var(--card); }
+        .btn-primary { background-color: var(--primary); }
+        
+        /* Smooth Toggle Animation */
+        .type-toggle-btn { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    </style>
+</head>
+<body class="min-h-screen pb-20">
+
+    <header class="h-[52px] btn-primary text-white flex items-center px-4 sticky top-0 z-50 shadow-md">
+        <button onclick="history.back()" class="mr-4 text-lg"><i class="fas fa-arrow-left"></i></button>
+        <h2 id="appTitleDisplay" class="text-sm font-bold uppercase tracking-wider">Farm App</h2>
+    </header>
+
+    <div class="max-w-md mx-auto p-4">
+        <div class="flex items-center gap-2 py-6 justify-center">
+            <span id="typeEmoji" class="text-3xl">🐷</span>
+            <h1 class="text-xl font-black tracking-tighter uppercase opacity-80">FarmTag Pro</h1>
+        </div>
+
+        <div class="farm-card rounded-[2rem] shadow-xl p-6 mb-6 border border-black/5">
+            <div class="space-y-4">
+                
+                <div class="flex bg-black/5 p-1 rounded-xl">
+                    <button id="typeSow" onclick="setTagType('Sow')" class="type-toggle-btn flex-1 py-2 text-[10px] font-black uppercase rounded-lg bg-white shadow-sm">Sow</button>
+                    <button id="typePen" onclick="setTagType('Pen')" class="type-toggle-btn flex-1 py-2 text-[10px] font-black uppercase text-gray-400">Pigpen / Fattener</button>
+                </div>
+
+                <div>
+                    <label id="nameLabel" class="block text-[10px] font-bold text-gray-400 mb-1 uppercase tracking-widest ml-2">Sow Name / ID</label>
+                    <input type="text" id="sowName" placeholder="e.g. Bessie-01" 
+                           class="w-full p-4 bg-black/5 border-none rounded-xl focus:ring-2 focus:ring-blue-400 outline-none text-lg font-bold">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-black/5 p-3 rounded-xl">
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Tag Color</label>
+                        <input type="color" id="qrColor" value="#2563eb" class="h-10 w-full border-none bg-transparent cursor-pointer">
+                    </div>
+                    <div class="bg-black/5 p-3 rounded-xl relative">
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Overlay Logo</label>
+                        <input type="file" id="logoUpload" accept="image/*" onchange="previewLogo(this)" class="absolute inset-0 opacity-0 cursor-pointer">
+                        <div id="fileStatus" class="text-xs font-bold text-blue-500 truncate">Add Logo +</div>
+                    </div>
+                </div>
+
+                <button onclick="generateSowTag()" class="w-full btn-primary text-white font-black py-4 rounded-xl shadow-lg transition-all active:scale-95">
+                    GENERATE TAG
+                </button>
+            </div>
+        </div>
+
+        <div id="tagContainer" class="space-y-3"></div>
+    </div>
+
+    <script>
+        let sowDatabase = JSON.parse(localStorage.getItem('sow_farm_data')) || [];
+        let sessionLogo = ""; 
+        let primaryColor = "#2563eb";
+        let currentType = "Sow"; // Default type
+
+        // --- EXISTING THEME SYNC LOGIC (RETAINED) ---
+        function syncWithDashboard() {
+            const appearance = JSON.parse(localStorage.getItem('appearance')) || {};
+            const theme = localStorage.getItem('theme') || 'light';
+            primaryColor = appearance.color || '#2563eb';
+            
+            document.body.classList.toggle('dark', theme === 'dark');
+            document.documentElement.style.setProperty('--primary', primaryColor);
+            
+            const title = appearance.appTitle || 'Farm App';
+            document.getElementById('appTitleDisplay').innerText = title;
+            document.getElementById('pageTitle').innerText = `FarmTag Pro | ${title}`;
+            
+            // Sync default color input with theme color
+            if(!document.getElementById('qrColor').dataset.changed) {
+                document.getElementById('qrColor').value = primaryColor;
+            }
+        }
+
+        // --- NEW: TYPE SWITCHER ---
+        function setTagType(type) {
+            currentType = type;
+            const isSow = type === 'Sow';
+            
+            document.getElementById('typeEmoji').innerText = isSow ? "🐷" : "🏘️";
+            document.getElementById('nameLabel').innerText = isSow ? 'Sow Name / ID' : 'Pen ID / Fattener Group';
+            document.getElementById('sowName').placeholder = isSow ? 'e.g. Bessie-01' : 'e.g. Pen-04-West';
+            
+            // UI Toggle Classes
+            document.getElementById('typeSow').className = isSow ? "type-toggle-btn flex-1 py-2 text-[10px] font-black uppercase rounded-lg bg-white shadow-sm" : "type-toggle-btn flex-1 py-2 text-[10px] font-black uppercase text-gray-400";
+            document.getElementById('typePen').className = !isSow ? "type-toggle-btn flex-1 py-2 text-[10px] font-black uppercase rounded-lg bg-white shadow-sm" : "type-toggle-btn flex-1 py-2 text-[10px] font-black uppercase text-gray-400";
+        }
+
+        function previewLogo(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    sessionLogo = e.target.result;
+                    document.getElementById('fileStatus').innerText = "Logo Ready ✅";
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        // --- EXISTING FUNCTIONS (MODIFIED FOR GENERALITY) ---
+        function copyDefinition(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Copied!', showConfirmButton: false, timer: 1500 });
+            });
+        }
+
+        function generateSowTag() {
+            const nameInput = document.getElementById('sowName');
+            const colorInput = document.getElementById('qrColor');
+            if (!nameInput.value.trim()) return Swal.fire("Error", "Enter Name or ID", "error");
+
+            // Prefix Logic: SW for Sow, PN for Pen
+            const prefix = currentType === 'Sow' ? 'SW' : 'PN';
+            const dateStr = new Date().toISOString().slice(2, 10).replace(/-/g, ''); 
+            const randomID = Math.random().toString(36).substring(2, 6).toUpperCase();
+
+            const newSow = {
+                id: Date.now(),
+                tagId: `${prefix}-${dateStr}-${randomID}`,
+                sowName: nameInput.value,
+                color: colorInput.value,
+                type: currentType // Store type
+            };
+
+            sowDatabase.unshift(newSow);
+            localStorage.setItem('sow_farm_data', JSON.stringify(sowDatabase));
+            nameInput.value = "";
+            
+            // Haptic Feedback (if supported)
+            if (window.navigator.vibrate) window.navigator.vibrate(50);
+            
+            renderTags();
+        }
+
+        function renderTags() {
+            const container = document.getElementById('tagContainer');
+            container.innerHTML = "";
+            sowDatabase.forEach(sow => {
+                const typeTag = sow.type || 'Sow';
+                const div = document.createElement('div');
+                div.className = "farm-card p-4 rounded-3xl shadow-sm border border-black/5 flex items-center justify-between";
+                div.innerHTML = `
+                    <div class="flex-1 pr-4">
+                        <div class="flex items-center gap-2 mb-1">
+                             <span class="text-[7px] font-black px-1.5 py-0.5 rounded bg-black/10 uppercase">${typeTag}</span>
+                             <h3 class="font-bold text-sm truncate w-32">${sow.sowName}</h3>
+                        </div>
+                        <div class="flex items-center gap-2 mb-3">
+                            <p class="text-[10px] opacity-40 font-mono">${sow.tagId}</p>
+                            <button onclick="copyDefinition('${sow.tagId}')" class="text-blue-500 text-[10px]"><i class="fas fa-copy"></i></button>
+                        </div>
+                        <div class="flex gap-3">
+                            <button onclick="downloadHighRes('${sow.tagId}', '${sow.color}', '${sow.sowName}')" class="text-[10px] font-black uppercase text-blue-500">HQ PNG</button>
+                            <button onclick="editSow(${sow.id})" class="text-[10px] font-bold text-gray-400 uppercase">Edit</button>
+                            <button onclick="deleteSow(${sow.id})" class="text-[10px] font-bold text-red-400 uppercase">Del</button>
+                        </div>
+                    </div>
+                    <div id="canvas-${sow.id}" class="rounded-xl overflow-hidden border border-black/5"></div>
+                `;
+                container.appendChild(div);
+                new QRCodeStyling(getQRConfig(sow.tagId, sow.color, 90)).append(document.getElementById(`canvas-${sow.id}`));
+            });
+        }
+
+        async function editSow(id) {
+            const index = sowDatabase.findIndex(s => s.id === id);
+            const sow = sowDatabase[index];
+
+            const { value: formValues } = await Swal.fire({
+                title: 'Edit Tag',
+                html: `
+                    <input id="edit-name" class="swal2-input" value="${sow.sowName}" placeholder="Name/ID">
+                    <div style="margin-top:15px">
+                        <label style="display:block; font-size:12px; font-weight:bold;">Tag Color</label>
+                        <input type="color" id="edit-color" value="${sow.color}" style="width:100%; height:40px; border:none; cursor:pointer;">
+                    </div>
+                `,
+                focusConfirm: false,
+                showCancelButton: true,
+                confirmButtonColor: primaryColor,
+                preConfirm: () => {
+                    return {
+                        newName: document.getElementById('edit-name').value,
+                        newColor: document.getElementById('edit-color').value
+                    }
+                }
+            });
+
+            if (formValues) {
+                sowDatabase[index].sowName = formValues.newName;
+                sowDatabase[index].color = formValues.newColor;
+                localStorage.setItem('sow_farm_data', JSON.stringify(sowDatabase));
+                renderTags();
+            }
+        }
+
+        function deleteSow(id) {
+            Swal.fire({ title: 'Delete Tag?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444' }).then(r => {
+                if(r.isConfirmed) {
+                    sowDatabase = sowDatabase.filter(s => s.id !== id);
+                    localStorage.setItem('sow_farm_data', JSON.stringify(sowDatabase));
+                    renderTags();
+                }
+            });
+        }
+
+        function getQRConfig(data, color, size = 100) {
+            return { 
+                width: size, 
+                height: size, 
+                data: data, 
+                image: sessionLogo || "", 
+                dotsOptions: { color: color, type: "rounded" }, 
+                cornersSquareOptions: { type: "extra-rounded", color: color }, 
+                imageOptions: { margin: 4, imageSize: 0.4 } 
+            };
+        }
+
+        function downloadHighRes(tagId, color, sowName) {
+            new QRCodeStyling(getQRConfig(tagId, color, 1500)).download({ name: `TAG_${sowName}`, extension: "png" });
+        }
+
+        // Listen for live theme changes from dashboard
+        window.addEventListener('storage', syncWithDashboard);
+
+        // Track if user manually changes color
+        document.getElementById('qrColor').addEventListener('input', () => {
+            document.getElementById('qrColor').dataset.changed = "true";
+        });
+
+        syncWithDashboard();
+        renderTags();
+    </script>
+</body>
+</html>

@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sow Breeding Records</title>
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary: #16a34a;
+      --secondary: #22c55e;
+      --bg: #f0fdf4;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --radius: 18px;
+      --shadow: 0 10px 25px rgba(0,0,0,0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    /* Header */
+    .header {
+      padding: 20px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: #fff;
+      border-bottom-left-radius: 28px;
+      border-bottom-right-radius: 28px;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    .header p {
+      margin-top: 6px;
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    /* Container */
+    .container {
+      padding: 16px;
+      margin-top: -20px;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 14px;
+      box-shadow: var(--shadow);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .card-left {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .tag {
+      display: inline-block;
+      background: #dcfce7;
+      color: var(--primary);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 999px;
+      width: fit-content;
+    }
+
+    .card h3 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .card small {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .card-right {
+      text-align: right;
+    }
+
+    .status {
+      font-size: 13px;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 12px;
+    }
+
+    .pregnant {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .open {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    /* Floating Button */
+    .fab {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--primary);
+      color: #fff;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+      cursor: pointer;
+    }
+
+    /* Bottom Nav */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #fff;
+      border-top-left-radius: 20px;
+      border-top-right-radius: 20px;
+      box-shadow: 0 -8px 20px rgba(0,0,0,0.08);
+      display: flex;
+      justify-content: space-around;
+      padding: 12px 0;
+    }
+
+    .bottom-nav button {
+      background: none;
+      border: none;
+      font-size: 13px;
+      color: var(--muted);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+    }
+
+    .bottom-nav button.active {
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    /* Spacer for bottom nav */
+    .spacer {
+      height: 90px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <div class="header">
+    <h1>Sow Breeding Records</h1>
+    <p>Monitor breeding, pregnancy, and parity</p>
+  </div>
+
+  <!-- Content -->
+  <div class="container" id="cardList"></div>
+
+  <div class="spacer"></div>
+
+  <!-- Floating Action Button -->
+  <div class="fab" onclick="addRecord()">+</div>
+
+  <!-- Bottom Navigation -->
+  <div class="bottom-nav">
+    <button class="active">Home</button>
+    <button>Records</button>
+    <button>Stats</button>
+    <button>Settings</button>
+  </div>
+
+  <script>
+    const records = [
+      { id: 'SOW-001', parity: 2, date: '2025-12-10', status: 'Pregnant' },
+      { id: 'SOW-002', parity: 1, date: '2025-11-25', status: 'Open' },
+      { id: 'SOW-003', parity: 4, date: '2025-10-02', status: 'Pregnant' }
+    ];
+
+    const cardList = document.getElementById('cardList');
+
+    function renderCards() {
+      cardList.innerHTML = '';
+      records.forEach(r => {
+        const card = document.createElement('div');
+        card.className = 'card';
+
+        card.innerHTML = `
+          <div class="card-left">
+            <span class="tag">${r.id}</span>
+            <h3>Parity: ${r.parity}</h3>
+            <small>Last bred: ${r.date}</small>
+          </div>
+          <div class="card-right">
+            <span class="status ${r.status === 'Pregnant' ? 'pregnant' : 'open'}">${r.status}</span>
+          </div>
+        `;
+
+        cardList.appendChild(card);
+      });
+    }
+
+    function addRecord() {
+      alert('Add new sow record (connect to form)');
+    }
+
+    renderCards();
+  </script>
+
+</body>
+</html>

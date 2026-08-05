@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Farm App</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<style>
+:root{
+  --primary:#2563eb;
+  --bg:#f4f6fb;
+  --card:#ffffff;
+  --text:#1f2937;
+  --muted:#6b7280;
+  --shadow:rgba(0,0,0,.06);
+  --font-family: 'Segoe UI', sans-serif;
+}
+body.dark{
+  --bg:#0f172a;
+  --card:#1e293b;
+  --text:#e5e7eb;
+  --muted:#94a3b8;
+  --shadow:rgba(0,0,0,.4);
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  padding:52px 0 52px;
+  font-family: var(--font-family);
+}
+
+/* SPLASH SCREEN */
+#splash-screen {
+  position: fixed;
+  inset: 0;
+  background: var(--primary);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  transition: opacity 0.5s ease, visibility 0.5s;
+}
+.splash-logo {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  margin-bottom: 20px;
+  object-fit: cover;
+}
+#splash-screen h1 {
+  color: #ffffff;
+  font-size: 24px;
+  margin: 0;
+  font-family: var(--font-family);
+}
+.splash-hidden {
+  opacity: 0;
+  visibility: hidden;
+}
+
+/* HEADER */
+header{
+  height:52px;
+  background:var(--primary);
+  position:fixed;
+  top:0;left:0;right:0;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:0 14px;
+  color:#fff;
+  z-index:1000;
+}
+.header-left{display:flex;align-items:center;gap:8px}
+.header-left img{width:30px;height:30px;border-radius:50%}
+.header-left h2{font-size:16px;margin:0}
+.header-icons{display:flex;gap:14px;position:relative}
+.header-icons i{font-size:18px;cursor:pointer}
+
+/* SETTINGS DROPDOWN */
+.dropdown{
+  position:absolute;
+  top:52px; right:0;
+  background:var(--card);
+  color:var(--text);
+  border-radius:12px;
+  box-shadow:0 6px 16px var(--shadow);
+  display:none;
+  flex-direction:column;
+  overflow:hidden;
+  width:220px;
+  z-index:1001;
+}
+.dropdown button{
+  background:none;
+  border:none;
+  padding:12px 16px;
+  text-align:left;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  color:var(--text);
+  font-size:14px;
+  font-family: var(--font-family);
+}
+.dropdown button i{ width:20px; text-align:center; }
+.dropdown button:hover{ background:rgba(0,0,0,0.05); }
+body.dark .dropdown button:hover{ background:rgba(255,255,255,0.1); }
+
+.container{max-width:480px;margin:auto;padding:16px}
+
+/* MODULE GRID */
+.menu{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:14px;
+}
+.box{
+  background:var(--card);
+  border-radius:14px;
+  padding:16px;
+  text-align:center;
+  box-shadow:0 4px 14px var(--shadow);
+  cursor:pointer;
+}
+.box i{font-size:26px;color:var(--primary)}
+.box h3{margin:8px 0 4px;font-size:14px}
+.box p{font-size:11px;color:var(--muted)}
+
+/* QUICK TOOLS */
+.tools{margin-top:24px}
+.tools h4{font-size:12px;color:var(--muted)}
+.tools-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:12px;
+}
+.tool{
+  background:var(--card);
+  border-radius:12px;
+  padding:10px 4px;
+  text-align:center;
+  box-shadow:0 4px 12px var(--shadow);
+  cursor:pointer;
+}
+.tool i{font-size:18px;color:var(--primary)}
+.tool span{font-size:10px;display:block;margin-top:4px}
+
+/* FOOTER */
+footer{
+  height:48px;
+  background:var(--primary);
+  position:fixed;
+  bottom:0;left:0;right:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#fff;
+  font-size:11px;
+}
+
+/* MODAL */
+.modal{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.5);
+  z-index:2000;
+  overflow-y:auto;
+  padding:16px;
+}
+.modal-content{
+  background:var(--card);
+  margin:80px auto;
+  width:100%;
+  max-width:380px;
+  padding:20px;
+  border-radius:14px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.modal-content label{ font-weight:bold; font-size:14px; margin-top:4px; }
+.modal-content input, .modal-content textarea, .modal-content select, .modal-content button{
+  width:100%; box-sizing:border-box; font-family: var(--font-family);
+}
+.modal-content input, .modal-content textarea, .modal-content select{
+  padding:10px; border-radius:8px; border:1px solid #ccc; font-size:14px;
+}
+.modal-content button{
+  padding:12px; border:none; border-radius:8px; background:var(--primary); color:#fff; font-size:14px; margin-top:8px;
+}
+.close{align-self:flex-end;font-size:20px;cursor:pointer}
+</style>
+</head>
+
+<body>
+
+<div id="splash-screen">
+  <img id="splashLogo" class="splash-logo" src="https://i.ibb.co/7r5pZ2F/pig-logo.png">
+  <h1 id="splashTitle">Farm App</h1>
+</div>
+
+<header>
+  <div class="header-left">
+    <img id="appLogo" src="https://i.ibb.co/7r5pZ2F/pig-logo.png">
+    <h2 id="appTitle">Farm App</h2>
+  </div>
+  <div class="header-icons">
+    <i class="fas fa-cog" onclick="toggleDropdown()"></i>
+    <i class="fas fa-moon" id="themeIcon" onclick="toggleTheme()"></i>
+    <div class="dropdown" id="settingsDropdown">
+      <button onclick="openAdd('module')"><i class="fas fa-plus"></i>Add Module</button>
+      <button onclick="openThemeChooser()"><i class="fas fa-palette"></i>Theme Color</button>
+      <button onclick="openAppearanceSettings()"><i class="fas fa-eye"></i>Appearance Settings</button>
+      <button onclick="exportData()"><i class="fas fa-download"></i>Backup Data</button>
+      <button onclick="importData()"><i class="fas fa-upload"></i>Restore Data</button>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <div class="menu" id="modules"></div>
+  <div class="tools">
+    <h4>Quick Tools</h4>
+    <div class="tools-grid" id="tools"></div>
+  </div>
+</div>
+
+<footer id="appFooter">© 2026 Farm System</footer>
+
+<div class="modal" id="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal()">&times;</span>
+    <form id="moduleForm" style="display:flex;flex-direction:column;gap:10px;">
+      <label>Icon</label>
+      <select id="icon"></select>
+      <label>Label</label>
+      <input id="label" placeholder="Module Name">
+      <label>Description</label>
+      <textarea id="desc" placeholder="Description"></textarea>
+      <label>Link (URL)</label>
+      <input id="link" placeholder="https://example.com">
+      <button type="button" onclick="save()">Save</button>
+    </form>
+  </div>
+</div>
+
+<script>
+/* ---------------- DOM ELEMENTS ---------------- */
+const splash = document.getElementById('splash-screen');
+const splashLogo = document.getElementById('splashLogo');
+const splashTitle = document.getElementById('splashTitle');
+const appLogo = document.getElementById('appLogo');
+const appTitleEl = document.getElementById('appTitle');
+const appFooter = document.getElementById('appFooter');
+const themeIcon = document.getElementById('themeIcon');
+const modulesEl = document.getElementById('modules');
+const toolsEl = document.getElementById('tools');
+const modal = document.getElementById('modal');
+const iconSelect = document.getElementById('icon');
+const labelInput = document.getElementById('label');
+const descInput = document.getElementById('desc');
+const linkInput = document.getElementById('link');
+
+let modules = JSON.parse(localStorage.getItem('modules')||'[]');
+let tools   = JSON.parse(localStorage.getItem('tools')||'[]');
+let currentType = null;
+let editIndex = null;
+
+/* ---------------- INITIALIZATION ---------------- */
+function initApp() {
+  const a = JSON.parse(localStorage.getItem('appearance')) || { 
+    color: '#2563eb', 
+    footerText: '© 2026 Farm System', 
+    footerHidden: false, 
+    appTitle: 'Farm App',
+    font: "'Segoe UI', sans-serif"
+  };
+  
+  applyLiveChanges(a);
+  
+  if(localStorage.getItem('theme')==='dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)){
+    document.body.classList.add('dark');
+    themeIcon.className='fas fa-sun';
+  }
+
+  setTimeout(() => { splash.classList.add('splash-hidden'); }, 2000);
+}
+
+function applyLiveChanges(data) {
+    if(!data) return;
+    if(data.color) {
+        document.documentElement.style.setProperty('--primary', data.color);
+        splash.style.backgroundColor = data.color;
+    }
+    if(data.logoBase64) {
+        splashLogo.src = data.logoBase64;
+        appLogo.src = data.logoBase64;
+    }
+    if(data.appTitle) {
+        splashTitle.textContent = data.appTitle;
+        appTitleEl.textContent = data.appTitle;
+    }
+    if(data.footerText) appFooter.textContent = data.footerText;
+    if(data.font) document.documentElement.style.setProperty('--font-family', data.font);
+    appFooter.style.display = data.footerHidden ? 'none' : 'flex';
+}
+
+/* Global Sync Listener to talk to other pages */
+window.addEventListener('storage', (e) => {
+    if (e.key === 'appearance') applyLiveChanges(JSON.parse(e.newValue));
+    if (e.key === 'theme') {
+        const isDark = e.newValue === 'dark';
+        document.body.classList.toggle('dark', isDark);
+        themeIcon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+    }
+});
+
+initApp();
+
+/* Helper for Syncing navigation */
+function navigateWithSync(link) {
+    if(!link) { Swal.fire('No link set'); return; }
+    const a = JSON.parse(localStorage.getItem('appearance')) || {};
+    const theme = localStorage.getItem('theme') || 'light';
+    const separator = link.includes('?') ? '&' : '?';
+    
+    const syncUrl = `${link}${separator}theme=${theme}&color=${encodeURIComponent(a.color || '#2563eb')}&title=${encodeURIComponent(a.appTitle || 'Farm App')}`;
+    window.location.href = syncUrl;
+}
+
+/* ---------------- THEME & APPEARANCE ---------------- */
+function toggleTheme(){
+  const d = document.body.classList.toggle('dark');
+  localStorage.setItem('theme', d ? 'dark' : 'light');
+  themeIcon.className = d ? 'fas fa-sun' : 'fas fa-moon';
+}
+
+function openThemeChooser(){
+  const a = JSON.parse(localStorage.getItem('appearance')) || { color:'#2563eb' };
+  Swal.fire({
+    title:'Theme Color',
+    html:`<div style="display:flex;gap:10px;justify-content:center">
+        <button class="c" data="#16a34a" style="background:#16a34a;width:40px;height:40px;border-radius:50%;border:none;cursor:pointer"></button>
+        <button class="c" data="#92400e" style="background:#92400e;width:40px;height:40px;border-radius:50%;border:none;cursor:pointer"></button>
+        <button class="c" data="#ea580c" style="background:#ea580c;width:40px;height:40px;border-radius:50%;border:none;cursor:pointer"></button>
+        <button class="c" data="#7c3aed" style="background:#7c3aed;width:40px;height:40px;border-radius:50%;border:none;cursor:pointer"></button>
+      </div><br>
+      <input type="color" id="pick" value="${a.color}">`,
+    showConfirmButton:false,
+    didOpen(){
+      document.querySelectorAll('.c').forEach(b=>{
+        b.onclick=()=>{ updateAppearancePart('color', b.getAttribute('data')); };
+      });
+      document.getElementById('pick').oninput=e=>{ updateAppearancePart('color', e.target.value); };
+    }
+  });
+}
+
+function updateAppearancePart(key, val) {
+    let a = JSON.parse(localStorage.getItem('appearance')) || {};
+    a[key] = val;
+    localStorage.setItem('appearance', JSON.stringify(a));
+    applyLiveChanges(a);
+}
+
+function openAppearanceSettings(){
+  const a = JSON.parse(localStorage.getItem('appearance')) || { color:'#2563eb', footerText:'© 2026 Farm System', footerHidden:false, appTitle:'Farm App', font: "'Segoe UI', sans-serif" };
+  Swal.fire({
+    title:'Appearance Settings',
+    html:`<div style="display:flex;flex-direction:column;gap:10px;text-align:left">
+        <label>App Title</label><input id="atIn" value="${a.appTitle||''}" style="padding:8px">
+        <label>Font Style</label><select id="afontIn" style="padding:8px;width:100%"><option value="'Segoe UI', sans-serif" ${a.font==="'Segoe UI', sans-serif"?'selected':''}>Sans-serif</option><option value="'Georgia', serif" ${a.font==="'Georgia', serif"?'selected':''}>Serif</option><option value="'Courier New', monospace" ${a.font==="'Courier New', monospace"?'selected':''}>Monospace</option></select>
+        <label>Theme Color</label><input type="color" id="acIn" value="${a.color||'#2563eb'}" style="width:100%">
+        <label>Logo</label><input type="file" id="alIn" accept="image/*">
+        <label>Footer Text</label><input id="afIn" value="${a.footerText||''}" style="padding:8px">
+        <label><input type="checkbox" id="ahIn" ${a.footerHidden?'checked':''}> Hide footer</label>
+      </div>`,
+    showCancelButton:true,
+    preConfirm:()=>new Promise(res=>{
+      const f=document.getElementById('alIn').files[0];
+      const data={ appTitle:document.getElementById('atIn').value, font:document.getElementById('afontIn').value, color:document.getElementById('acIn').value, footerText:document.getElementById('afIn').value, footerHidden:document.getElementById('ahIn').checked };
+      if(f){ const r=new FileReader(); r.onload=()=>{ data.logoBase64=r.result; res(data); }; r.readAsDataURL(f); } else { data.logoBase64=a.logoBase64; res(data); }
+    })
+  }).then(r=>{ if(r.isConfirmed){ localStorage.setItem('appearance', JSON.stringify(r.value)); applyLiveChanges(r.value); } });
+}
+
+/* ---------------- BACKUP & RESTORE ---------------- */
+function exportData() {
+    const data = {
+        modules: JSON.parse(localStorage.getItem('modules') || '[]'),
+        tools: JSON.parse(localStorage.getItem('tools') || '[]'),
+        appearance: JSON.parse(localStorage.getItem('appearance') || '{}'),
+        theme: localStorage.getItem('theme') || 'light'
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `farm_app_backup_${new Date().toISOString().slice(0,10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toggleDropdown();
+}
+
+/* ---------------- DATA RENDER ---------------- */
+const allIcons = ['fas fa-qrcode','fas fa-barcode','fas fa-home','fas fa-user','fas fa-cog','fas fa-plus','fas fa-trash','fas fa-edit','fas fa-envelope','fas fa-phone','fas fa-heart','fas fa-star','fas fa-bell','fas fa-tractor','fas fa-seedling','fas fa-piggy-bank','fas fa-warehouse','fas fa-calendar-days','fas fa-baby','fas fa-dna','fas fa-syringe','fas fa-weighttree','fas fa-hand-holding-water','fas fa-wind','fas fa-leaf','fas fa-paw','fas fa-calculator'];
+
+iconSelect.innerHTML = '';
+allIcons.forEach(i=>{
+    const o=document.createElement('option');
+    o.value=i;
+    o.textContent=i.replace('fas fa-','').replace(/-/g, ' ');
+    iconSelect.appendChild(o);
+});
+
+function render(){
+  modulesEl.innerHTML='';
+  modules.forEach((m,i)=>{
+    const div = document.createElement('div');
+    div.className = 'box';
+    div.innerHTML = `<i class="${m.icon}"></i><h3>${m.label}</h3><p>${m.desc}</p>`;
+    div.onclick = ()=>{ navigateWithSync(m.link); };
+    div.oncontextmenu = e=>{ e.preventDefault(); editItem('module',i); };
+    modulesEl.appendChild(div);
+  });
+  toolsEl.innerHTML=`<div class="tool" onclick="openAdd('tool')"><i class="fas fa-plus"></i><span>Add tool</span></div>`;
+  tools.forEach((t,i)=>{
+    const div = document.createElement('div');
+    div.className = 'tool';
+    div.innerHTML = `<i class="${t.icon}"></i><span>${t.label}</span>`;
+    div.onclick = ()=>{ navigateWithSync(t.link); };
+    div.oncontextmenu = e=>{ e.preventDefault(); editItem('tool',i); };
+    toolsEl.appendChild(div);
+  });
+}
+render();
+
+/* ---------------- CRUD ---------------- */
+function openAdd(t){ 
+  currentType = t; editIndex = null;
+  iconSelect.value = allIcons[0]; labelInput.value = ''; descInput.value = ''; linkInput.value = ''; 
+  modal.style.display = 'block'; 
+}
+
+function editItem(t, i){
+  currentType = t; editIndex = i;
+  const data = (t === 'module') ? modules[i] : tools[i];
+  iconSelect.value = data.icon; labelInput.value = data.label; descInput.value = data.desc; linkInput.value = data.link;
+  
+  Swal.fire({
+    title: 'Edit or Delete?', 
+    showDenyButton: true, confirmButtonText: 'Edit', denyButtonText: 'Delete'
+  }).then(r => {
+    if(r.isDenied){
+      Swal.fire({title: 'Delete?', showCancelButton: true}).then(x => {
+        if(!x.isConfirmed) return;
+        if(t === 'module') modules.splice(i, 1); else tools.splice(i, 1);
+        saveToLocal(); render();
+      });
+    } else if(r.isConfirmed) modal.style.display = 'block';
+  });
+}
+
+function save(){
+  const obj = { icon: iconSelect.value, label: labelInput.value, desc: descInput.value, link: linkInput.value };
+  if(editIndex !== null){
+    if(currentType === 'module') modules[editIndex] = obj; else tools[editIndex] = obj;
+  } else {
+    if(currentType === 'module') modules.push(obj); else tools.push(obj);
+  }
+  saveToLocal(); modal.style.display = 'none'; render();
+  Swal.fire('Saved','','success');
+}
+
+function saveToLocal(){
+  localStorage.setItem('modules', JSON.stringify(modules));
+  localStorage.setItem('tools', JSON.stringify(tools));
+}
+
+function closeModal(){ modal.style.display = 'none'; }
+function toggleDropdown(){ const sd = document.getElementById('settingsDropdown'); sd.style.display = sd.style.display==='flex'?'none':'flex'; }
+function askPassword(){ Swal.fire({title:'Enter Password', input:'password'}); }
+</script>
+</body>
+</html>

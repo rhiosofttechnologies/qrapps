@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title id="pageTitle">Sow Records</title>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script src="https://unpkg.com/html5-qrcode"></script>
+
+<style>
+:root {
+    --primary: #2563eb; 
+    --bg: #f4f6fb;
+    --card: #ffffff;
+    --text: #1f2937;
+    --muted: #6b7280;
+    --border: #e2e8f0;
+    --shadow: rgba(0,0,0,.06);
+    --font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+body.dark {
+    --bg: #0f172a;
+    --card: #1e293b;
+    --text: #e5e7eb;
+    --muted: #94a3b8;
+    --border: #334155;
+    --shadow: rgba(0,0,0,.4);
+}
+
+* { box-sizing: border-box; font-family: var(--font-family); transition: background 0.2s, color 0.2s; }
+
+body { 
+    margin: 0; background: var(--bg); color: var(--text); 
+    padding: 70px 0 100px 0; overflow-x: hidden;
+}
+
+header {
+    height: 52px; background: var(--primary); position: fixed;
+    top: 0; left: 0; right: 0; display: flex; justify-content: space-between;
+    align-items: center; padding: 0 14px; color: #fff; z-index: 1000;
+}
+header h2 { font-size: 16px; margin: 0; font-weight: 600; flex-grow: 1; margin-left: 15px; }
+header i { font-size: 18px; cursor: pointer; padding: 5px; }
+
+.menu-container { position: relative; }
+.dropdown-content {
+    display: none; position: absolute; right: 0; top: 40px;
+    background: var(--card); min-width: 200px; border-radius: 8px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.2); z-index: 1100; overflow: hidden;
+}
+.dropdown-content button {
+    width: 100%; border: none; background: none; padding: 12px 16px;
+    text-align: left; color: var(--text); font-size: 14px; cursor: pointer;
+    display: flex; align-items: center; gap: 10px;
+}
+.dropdown-content button:hover { background: rgba(0,0,0,0.05); }
+.show { display: block; }
+
+.container { max-width: 480px; margin: auto; padding: 0 15px; width: 100%; }
+
+.search-container { display: flex; gap: 8px; margin-bottom: 20px; }
+.search-bar { flex: 1; position: relative; }
+.search-bar input {
+    width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--border); 
+    background: var(--card); color: var(--text); outline: none;
+}
+.scan-btn {
+    background: var(--primary); color: white; border: none; width: 48px; 
+    border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+
+.view-toggle {
+    display: flex; background: var(--border); border-radius: 10px;
+    padding: 4px; margin-bottom: 20px;
+}
+.view-toggle button {
+    flex: 1; border: none; background: none; padding: 8px;
+    border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer;
+    color: var(--muted);
+}
+.view-toggle button.active {
+    background: var(--card); color: var(--primary); box-shadow: 0 2px 4px var(--shadow);
+}
+
+.record { margin-bottom: 12px; width: 100%; }
+.record-header { 
+    background: var(--card); padding: 15px; border-radius: 14px; 
+    box-shadow: 0 4px 12px var(--shadow); cursor: pointer; border-left: 4px solid var(--primary);
+}
+.record-main { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.record-info strong { display: flex; align-items: center; gap: 8px; font-size: 15px; }
+.record-info small.qr-def { 
+    display: block; color: var(--muted); font-size: 10px; 
+    font-family: monospace; margin-top: 2px; opacity: 0.8;
+}
+
+.qr-icon-on { color: var(--primary); font-size: 13px; }
+.qr-icon-off { color: var(--muted); font-size: 13px; opacity: 0.4; }
+
+.day-badge {
+    background: rgba(37, 99, 235, 0.1); color: var(--primary);
+    padding: 2px 8px; border-radius: 6px; font-weight: bold; font-size: 10px;
+    margin-top: 5px; display: inline-block; border: 1px solid rgba(37, 99, 235, 0.2);
+}
+
+.archive-badge {
+    background: #fee2e2; color: #dc2626; font-size: 9px; 
+    padding: 2px 6px; border-radius: 5px; font-weight: bold; margin-top: 4px; display: inline-block;
+}
+
+.progress-container { background: rgba(0,0,0,0.1); border-radius: 10px; height: 6px; margin-top: 10px; overflow: hidden; }
+.progress-bar { height: 100%; background: #16a34a; width: 0%; transition: width 0.5s; }
+
+.notes-grid { 
+    display: grid; grid-template-columns: repeat(2, 1fr); 
+    gap: 10px; margin-top: 10px; display: none; 
+}
+.record:not(.collapsed) .notes-grid { display: grid; }
+
+.note-card { 
+    padding: 10px; border-radius: 12px; min-height: 105px; 
+    display: flex; flex-direction: column; font-size: 11px; border: 1px solid rgba(0,0,0,0.05);
+}
+
+.fab { 
+    position: fixed; bottom: 25px; right: 25px; width: 56px; height: 56px; 
+    border-radius: 50%; background: var(--primary); display: flex; 
+    justify-content: center; align-items: center; color: white; 
+    font-size: 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 10; 
+}
+
+/* Empty State */
+.empty-state { text-align: center; padding: 60px 20px; color: var(--muted); }
+.empty-state i { font-size: 46px; color: var(--border); margin-bottom: 16px; display: block; }
+.empty-state h3 { margin: 0 0 6px; font-size: 16px; color: var(--text); }
+.empty-state p { margin: 0; font-size: 13px; }
+
+/* ---------------- ANDROID-STYLE BOTTOM SHEET ---------------- */
+.sheet-backdrop {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+    z-index: 2000; opacity: 0; pointer-events: none;
+    transition: opacity 0.28s ease;
+}
+.sheet-backdrop.show { opacity: 1; pointer-events: auto; }
+
+.bottom-sheet {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 2001;
+    background: var(--card); border-radius: 22px 22px 0 0;
+    max-height: 88vh; display: flex; flex-direction: column;
+    transform: translateY(100%);
+    transition: transform 0.32s cubic-bezier(0.32, 0.72, 0, 1);
+    box-shadow: 0 -10px 35px rgba(0,0,0,0.3);
+}
+.bottom-sheet.show { transform: translateY(0); }
+.bottom-sheet.dragging { transition: none; }
+
+.sheet-handle-wrap { display: flex; justify-content: center; padding: 10px 0 6px; cursor: grab; touch-action: none; }
+.sheet-handle { width: 38px; height: 4px; border-radius: 3px; background: var(--border); }
+
+.sheet-header { padding: 2px 20px 14px; font-size: 17px; font-weight: 700; color: var(--text); border-bottom: 1px solid var(--border); }
+
+.sheet-body { padding: 18px 20px 6px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 16px; -webkit-overflow-scrolling: touch; }
+
+.sheet-field label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; display: block; margin-bottom: 7px; }
+.sheet-field input {
+    width: 100%; padding: 13px 14px; border-radius: 12px; border: 1.5px solid var(--border);
+    background: var(--bg); color: var(--text); font-size: 15px; outline: none;
+}
+.sheet-field input:focus { border-color: var(--primary); }
+
+.sheet-qr-row { display: flex; gap: 8px; }
+.sheet-qr-row input { flex: 1; }
+.sheet-qr-row button {
+    width: 48px; border-radius: 12px; border: none; background: var(--primary);
+    color: #fff; font-size: 16px; cursor: pointer;
+}
+
+.sheet-footer {
+    display: flex; gap: 10px; padding: 16px 20px calc(18px + env(safe-area-inset-bottom, 0px));
+    border-top: 1px solid var(--border);
+}
+.sheet-footer button { flex: 1; padding: 14px; border-radius: 14px; border: none; font-weight: 700; font-size: 15px; cursor: pointer; }
+.sheet-btn-cancel { background: var(--bg); color: var(--text); }
+.sheet-btn-save { background: var(--primary); color: #fff; box-shadow: 0 4px 12px rgba(37,99,235,0.35); }
+</style>
+</head>
+<body id="appBody">
+
+<header>
+    <i class="fas fa-arrow-left" onclick="window.history.back()"></i>
+    <h2 id="appTitle">Sow Breeding Records</h2>
+    <div class="menu-container">
+        <i class="fas fa-ellipsis-v" onclick="toggleMenu()"></i>
+        <div id="dropdownMenu" class="dropdown-content">
+            <button onclick="archiveCompleted()"><i class="fas fa-archive"></i> Archive Completed</button>
+            <button onclick="exportJSON()"><i class="fas fa-download"></i> Backup (JSON)</button>
+            <button onclick="importJSON()"><i class="fas fa-upload"></i> Restore (JSON)</button>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+    <div class="view-toggle">
+        <button id="btnActive" class="active" onclick="switchView('active')">Active</button>
+        <button id="btnHistory" onclick="switchView('history')">History Folder</button>
+    </div>
+
+    <div class="search-container">
+        <div class="search-bar">
+            <input id="searchInput" placeholder="Search name or Pen QR..." oninput="render()">
+        </div>
+        <button class="scan-btn" onclick="startScanner('search')">
+            <i class="fas fa-qrcode"></i>
+        </button>
+    </div>
+    
+    <div id="records"></div>
+</div>
+
+<div class="fab" onclick="openAddModal()"><i class="fa fa-plus"></i></div>
+
+<script>
+/* ---------------- APPEARANCE SYNC ---------------- */
+function applySync() {
+    const params = new URLSearchParams(window.location.search);
+    const a = JSON.parse(localStorage.getItem('appearance')) || {};
+    const theme = params.get('theme') || localStorage.getItem('theme') || 'light';
+    const color = params.get('color') || a.color || '#2563eb';
+    const title = params.get('title') || a.appTitle || 'Farm App';
+
+    document.documentElement.style.setProperty('--primary', decodeURIComponent(color));
+    document.body.classList.toggle('dark', theme === 'dark');
+    const cleanTitle = decodeURIComponent(title);
+    document.getElementById('appTitle').textContent = `Sow Records - ${cleanTitle}`;
+}
+window.addEventListener('storage', applySync);
+applySync();
+
+/* ---------------- DATA STORAGE ---------------- */
+let records = JSON.parse(localStorage.getItem("stickyRecords")) || [];
+let historyRecords = JSON.parse(localStorage.getItem("sowHistory")) || [];
+let currentView = 'active';
+let html5QrCode = null;
+
+const save = () => {
+    localStorage.setItem("stickyRecords", JSON.stringify(records));
+    localStorage.setItem("sowHistory", JSON.stringify(historyRecords));
+};
+
+/* ---------------- SCANNER LOGIC ---------------- */
+async function stopManualScanner() {
+    if (html5QrCode) {
+        if(html5QrCode.isScanning) await html5QrCode.stop();
+        html5QrCode = null;
+    }
+}
+
+async function startScanner(target) {
+    await stopManualScanner();
+
+    if (target === 'search') {
+        await Swal.fire({
+            title: 'Scan Pen QR',
+            html: '<div id="reader" style="width:100%; min-height:250px; background:#000; border-radius:10px; overflow:hidden;"></div>',
+            showConfirmButton: false,
+            showCancelButton: true,
+            didOpen: () => {
+                html5QrCode = new Html5Qrcode("reader");
+                html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (text) => {
+                    document.getElementById('searchInput').value = text;
+                    render();
+                    stopManualScanner().then(() => Swal.close());
+                });
+            },
+            willClose: stopManualScanner
+        });
+    } else if (target === 'modal') {
+        const overlay = document.createElement('div');
+        overlay.style = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:3000; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px;";
+        overlay.innerHTML = `
+            <div style="width:100%; max-width:400px; background:var(--card); padding:20px; border-radius:15px; text-align:center;">
+                <h3 style="margin:0 0 15px 0; color:var(--text);">Scanning Pen QR...</h3>
+                <div id="reader" style="width:100%; min-height:250px; background:#000; border-radius:10px; overflow:hidden;"></div>
+                <button id="closeScan" style="margin-top:15px; width:100%; padding:12px; background:#dc2626; color:white; border:none; border-radius:8px; font-weight:bold;">Cancel Scan</button>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+
+        html5QrCode = new Html5Qrcode("reader");
+        document.getElementById('closeScan').onclick = async () => { await stopManualScanner(); overlay.remove(); };
+
+        html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (text) => {
+            const input = document.getElementById('sheet-qr');
+            if(input) input.value = text;
+            stopManualScanner().then(() => overlay.remove());
+        }).catch(() => overlay.remove());
+    }
+}
+
+/* ---------------- CORE UTILS ---------------- */
+function getDaysSince(date) {
+    const start = new Date(date).setHours(0,0,0,0);
+    const today = new Date().setHours(0,0,0,0);
+    return Math.floor((today - start) / 86400000);
+}
+
+function getOrdinalLabel(day) {
+    const suffixes = ["th", "st", "nd", "rd"];
+    const v = day % 100;
+    return day + (suffixes[(v - 20) % 10] || suffixes[v] || suffixes[0]) + " Day";
+}
+
+function calcNotes(date){
+    const dList = [21,42,90,100,115];
+    const colors = ["#fff3a0","#ffd6a5","#fdffb6","#caffbf","#9bf6ff"];
+    return dList.map((d,i) => {
+        let nd = new Date(date); nd.setDate(nd.getDate() + d);
+        return { day:d, date:nd.toISOString().split('T')[0], text:"", color:colors[i], done:false };
+    });
+}
+
+/* ---------------- ANDROID-STYLE BOTTOM SHEET ---------------- */
+function buildSheetFields(title, qr, date) {
+    return `
+        <div class="sheet-field">
+            <label>Sow Name / ID</label>
+            <input id="sheet-title" value="${title}" placeholder="e.g. Sow #204">
+        </div>
+        <div class="sheet-field">
+            <label>Pen QR Tag</label>
+            <div class="sheet-qr-row">
+                <input id="sheet-qr" value="${qr}" placeholder="Scan or type pen tag">
+                <button type="button" onclick="startScanner('modal')"><i class="fas fa-qrcode"></i></button>
+            </div>
+        </div>
+        <div class="sheet-field">
+            <label>Breeding Date</label>
+            <input id="sheet-date" type="date" value="${date}">
+        </div>
+    `;
+}
+
+function openRecordSheet(headerTitle, title, qr, date, onSave) {
+    closeBottomSheet(true);
+
+    const backdrop = document.createElement('div');
+    backdrop.className = 'sheet-backdrop';
+    backdrop.id = 'sheetBackdrop';
+
+    const sheet = document.createElement('div');
+    sheet.className = 'bottom-sheet';
+    sheet.id = 'bottomSheet';
+    sheet.innerHTML = `
+        <div class="sheet-handle-wrap" id="sheetHandle"><div class="sheet-handle"></div></div>
+        <div class="sheet-header">${headerTitle}</div>
+        <div class="sheet-body">${buildSheetFields(title, qr, date)}</div>
+        <div class="sheet-footer">
+            <button type="button" class="sheet-btn-cancel" onclick="closeBottomSheet()">Cancel</button>
+            <button type="button" class="sheet-btn-save" id="sheetSaveBtn">Save</button>
+        </div>
+    `;
+
+    document.body.appendChild(backdrop);
+    document.body.appendChild(sheet);
+    document.body.style.overflow = 'hidden';
+
+    backdrop.onclick = () => closeBottomSheet();
+
+    document.getElementById('sheetSaveBtn').onclick = () => {
+        const value = {
+            title: document.getElementById('sheet-title').value,
+            qr: document.getElementById('sheet-qr').value,
+            date: document.getElementById('sheet-date').value
+        };
+        if (!value.date) {
+            const dateInput = document.getElementById('sheet-date');
+            dateInput.style.borderColor = '#dc2626';
+            dateInput.focus();
+            return;
+        }
+        closeBottomSheet();
+        onSave(value);
+    };
+
+    // Drag-down-to-dismiss on the handle, Android bottom-sheet style
+    let startY = 0, dragY = 0, dragging = false;
+    const handle = document.getElementById('sheetHandle');
+
+    const onDragStart = (y) => { dragging = true; startY = y; sheet.classList.add('dragging'); };
+    const onDragMove = (y) => {
+        if (!dragging) return;
+        dragY = Math.max(0, y - startY);
+        sheet.style.transform = `translateY(${dragY}px)`;
+    };
+    const onDragEnd = () => {
+        if (!dragging) return;
+        dragging = false;
+        sheet.classList.remove('dragging');
+        if (dragY > 110) {
+            closeBottomSheet();
+        } else {
+            sheet.style.transform = '';
+        }
+        dragY = 0;
+    };
+
+    handle.addEventListener('touchstart', e => onDragStart(e.touches[0].clientY), { passive: true });
+    handle.addEventListener('touchmove', e => onDragMove(e.touches[0].clientY), { passive: true });
+    handle.addEventListener('touchend', onDragEnd);
+    handle.addEventListener('mousedown', e => onDragStart(e.clientY));
+    window.addEventListener('mousemove', e => onDragMove(e.clientY));
+    window.addEventListener('mouseup', onDragEnd);
+
+    requestAnimationFrame(() => {
+        backdrop.classList.add('show');
+        sheet.classList.add('show');
+    });
+}
+
+function closeBottomSheet(instant) {
+    const backdrop = document.getElementById('sheetBackdrop');
+    const sheet = document.getElementById('bottomSheet');
+    if (!backdrop || !sheet) return;
+    document.body.style.overflow = '';
+    if (instant) { backdrop.remove(); sheet.remove(); return; }
+    backdrop.classList.remove('show');
+    sheet.classList.remove('show');
+    setTimeout(() => { backdrop.remove(); sheet.remove(); }, 300);
+}
+
+/* ---------------- CRUD ---------------- */
+function switchView(view) {
+    currentView = view;
+    document.getElementById('btnActive').classList.toggle('active', view === 'active');
+    document.getElementById('btnHistory').classList.toggle('active', view === 'history');
+    render();
+}
+
+function render(){
+    const q = document.getElementById("searchInput").value.toLowerCase();
+    const container = document.getElementById("records");
+    container.innerHTML = "";
+    const data = currentView === 'active' ? records : historyRecords;
+    let shown = 0;
+
+    data.forEach((r, i) => {
+        if(!r.title.toLowerCase().includes(q) && !(r.qrCode && r.qrCode.toLowerCase().includes(q))) return;
+        shown++;
+        
+        let daysPassed = getDaysSince(r.breedingDate);
+        if(currentView === 'history' && daysPassed > 115) daysPassed = 115;
+        const doneCount = r.notes.filter(n => n.done).length;
+        const progress = (doneCount / 5) * 100;
+        const eligible = currentView === 'active' && daysPassed >= 115;
+        const qrIcon = (r.qrCode) ? '<i class="fas fa-qrcode qr-icon-on"></i>' : '<i class="fas fa-qrcode qr-icon-off"></i>';
+
+        const rec = document.createElement("div");
+        rec.className = `record ${r.collapsed ? 'collapsed' : ''}`;
+        rec.innerHTML = `
+            <div class="record-header" onclick="toggleRecord(${i})">
+                <div class="record-main">
+                    <div class="record-info">
+                        <strong>${qrIcon} ${r.title}</strong>
+                        <span class="day-badge">Day ${daysPassed} of 115</span>
+                        <small class="qr-def">Pen: ${r.qrCode || 'No QR'}</small>
+                        ${eligible ? '<br><span class="archive-badge">READY TO ARCHIVE</span>' : ''}
+                    </div>
+                    <div style="display:flex; gap:12px;">
+                        <i class="fas fa-edit" onclick="event.stopPropagation(); editRecord(${i})"></i>
+                        <i class="fas fa-trash" style="color:#dc2626" onclick="event.stopPropagation(); confirmDelete(${i})"></i>
+                    </div>
+                </div>
+                <div class="progress-container"><div class="progress-bar" style="width:${progress}%"></div></div>
+            </div>
+            <div class="notes-grid"></div>
+        `;
+
+        const grid = rec.querySelector(".notes-grid");
+        r.notes.forEach((n, ni) => {
+            const card = document.createElement("div");
+            card.className = "note-card";
+            card.style.backgroundColor = n.color;
+            card.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:3px;">
+                    <b style="color:#333; font-size:10px;">${getOrdinalLabel(n.day)}</b>
+                    ${n.done ? 
+                        '<span style="background:#16a34a; color:#fff; font-size:8px; padding:2px 4px; border-radius:4px;">DONE</span>' : 
+                        `<input type="checkbox" onclick="markNoteDone(${i}, ${ni})">`
+                    }
+                </div>
+                <small style="color:#666">${new Date(n.date).toDateString()}</small>
+                <textarea oninput="updateNote(${i}, ${ni}, this.value)" style="flex:1; border:none; resize:none; background:transparent; outline:none; font-size:11px; color:#333; width:100%;">${n.text}</textarea>
+            `;
+            grid.appendChild(card);
+        });
+        container.appendChild(rec);
+    });
+
+    if(shown === 0) {
+        const noDataAtAll = data.length === 0;
+        const isHistory = currentView === 'history';
+        container.innerHTML = noDataAtAll
+            ? (isHistory
+                ? `<div class="empty-state">
+                     <i class="fas fa-box-archive"></i>
+                     <h3>No archived records</h3>
+                     <p>Sows that reach Day 115 can be archived from the menu.</p>
+                   </div>`
+                : `<div class="empty-state">
+                     <i class="fas fa-piggy-bank"></i>
+                     <h3>No sow records yet</h3>
+                     <p>Tap the + button to add your first breeding record.</p>
+                   </div>`)
+            : `<div class="empty-state">
+                 <i class="fas fa-magnifying-glass"></i>
+                 <h3>No matches found</h3>
+                 <p>Try a different name or Pen QR.</p>
+               </div>`;
+    }
+}
+
+function openAddModal(){
+    openRecordSheet('New Record', '', '', '', (value) => {
+        records.push({ title: value.title, qrCode: value.qr, breedingDate: value.date, collapsed: true, notes: calcNotes(value.date) });
+        save(); render();
+    });
+}
+
+function editRecord(i){
+    const data = currentView === 'active' ? records : historyRecords;
+    const r = data[i];
+    openRecordSheet('Edit Record', r.title, r.qrCode || '', r.breedingDate, (value) => {
+        r.title = value.title; r.qrCode = value.qr;
+        if(r.breedingDate !== value.date){ r.breedingDate = value.date; r.notes = calcNotes(value.date); }
+        save(); render();
+    });
+}
+
+function markNoteDone(ri, ni) { const data = currentView === 'active' ? records : historyRecords; data[ri].notes[ni].done = true; save(); render(); }
+function toggleRecord(i) { const data = currentView === 'active' ? records : historyRecords; data[i].collapsed = !data[i].collapsed; save(); render(); }
+function updateNote(ri, ni, val) { const data = currentView === 'active' ? records : historyRecords; data[ri].notes[ni].text = val; save(); }
+function confirmDelete(i) { Swal.fire({title:'Delete?', showCancelButton:true, confirmButtonColor:'#dc2626'}).then(res => { if(res.isConfirmed){ if(currentView==='active')records.splice(i,1); else historyRecords.splice(i,1); save(); render(); }});}
+function toggleMenu() { document.getElementById("dropdownMenu").classList.toggle("show"); }
+
+function archiveCompleted() {
+    const toArchive = records.filter(r => getDaysSince(r.breedingDate) >= 115);
+    if (!toArchive.length) return Swal.fire("Notice", "Nothing to archive.", "info");
+    historyRecords.push(...toArchive);
+    records = records.filter(r => !toArchive.includes(r));
+    save(); render();
+}
+
+function exportJSON() {
+    const blob = new Blob([JSON.stringify({active:records, history:historyRecords})], {type: "application/json"});
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = "Sow_Records.json"; a.click();
+}
+
+function importJSON() {
+    const inp = document.createElement('input'); inp.type = 'file';
+    inp.onchange = e => {
+        const reader = new FileReader();
+        reader.onload = re => {
+            const c = JSON.parse(re.target.result);
+            records = c.active || []; historyRecords = c.history || [];
+            save(); render();
+        };
+        reader.readAsText(e.target.files[0]);
+    };
+    inp.click();
+}
+
+render();
+</script>
+</body>
+</html>
