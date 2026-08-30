@@ -1,4 +1,3 @@
-html
 <!DOCTYPE html>
 <html lang="en">
 
@@ -6,9 +5,15 @@ html
 
 <meta charset="UTF-8">
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
 <title>Digital Invitation - RhioSoft Technologies</title>
 
+<!-- Font Awesome for Music Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
 <style>
 
@@ -42,20 +47,26 @@ body{
 
 #book{
     position:fixed;
-    inset:0;
+    top:0;
+    left:0;
 
     width:100vw;
     height:100vh;
 
     overflow:hidden;
+    margin:0;
+    padding:0;
 }
 
 
+
+
 /* =========================================================
-   EVERY PAGE
+   EVERY PAGE & BORDER CONTAINER
 ========================================================= */
 
 .page{
+    position: relative;
     width:100%;
     height:100%;
 
@@ -64,12 +75,89 @@ body{
     justify-content:center;
     align-items:center;
 
-    background:#fff;
+    background:#111;
 
     overflow:hidden;
 
     user-select:none;
     -webkit-user-select:none;
+
+    padding:0;
+}
+
+.page-container{
+    position:relative;
+
+    width:100%;
+    height:100%;
+
+    background:#000;
+
+    border:none;
+    border-radius:0;
+
+    box-shadow:none;
+
+    overflow:hidden;
+
+    display:flex;
+    flex-direction:column;
+
+    justify-content:center;
+    align-items:center;
+}
+
+.page-container img{
+    width:100%;
+    height:100%;
+
+    object-fit:cover;
+
+    display:block;
+
+    pointer-events:none;
+
+    image-rendering:-webkit-optimize-contrast;
+}
+
+/* Page Corner Fold Visual Hint */
+.page-container::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0 0 35px 35px;
+    border-color: transparent transparent rgba(255, 255, 255, 0.3) transparent;
+    pointer-events: none;
+    z-index: 10;
+    transition: opacity 0.3s ease;
+}
+
+/* Page Number Badge */
+.page-number{
+    position:absolute;
+
+    bottom:12px;
+    right:16px;
+
+    font-size:12px;
+    font-weight:bold;
+
+    color:#444;
+
+    background:rgba(255,255,255,.85);
+
+    padding:3px 8px;
+
+    border-radius:12px;
+    border:1px solid rgba(0,0,0,.1);
+
+    z-index:5;
+
+    pointer-events:none;
 }
 
 
@@ -98,563 +186,16 @@ body{
    COVER
 ========================================================= */
 
-.cover{
-    position:relative;
-
+.page.--cover{
     background:#000;
-
-    padding:0;
-
-    overflow:hidden;
 }
 
-.cover img{
-    width:100%;
-    height:100%;
-
+.page.--cover .page-container img{
     object-fit:contain;
-
-    display:block;
-
-    pointer-events:none;
-}
-
-.cover::before{
-    content:"";
-
-    position:absolute;
-    inset:0;
-
-    background:#000;
-
-    z-index:-1;
 }
 
 
-/* =========================================================
-   GALLERY PAGE
-========================================================= */
 
-.gallery-page{
-    position:relative;
-
-    z-index:20;
-
-    background:#f5f5f5;
-
-    overflow:hidden !important;
-}
-
-
-/* =========================================================
-   GALLERY CONTENT
-========================================================= */
-
-.gallery-content{
-
-    position:relative;
-
-    z-index:30;
-
-    width:100%;
-    height:100%;
-
-    display:block;
-
-    padding:
-        clamp(20px,4vw,60px);
-
-    overflow-y:auto !important;
-    overflow-x:hidden;
-
-    -webkit-overflow-scrolling:touch;
-
-    touch-action:pan-y;
-
-    overscroll-behavior:contain;
-
-    scrollbar-width:none;
-}
-
-
-.gallery-content::-webkit-scrollbar{
-    display:none;
-}
-
-
-/* =========================================================
-   GALLERY TITLE
-========================================================= */
-
-.gallery-title{
-
-    font-size:
-        clamp(2rem,5vw,4rem);
-
-    margin-bottom:5px;
-
-    color:#222;
-
-    text-align:center;
-}
-
-
-.gallery-subtitle{
-
-    font-size:
-        clamp(.9rem,2vw,1.2rem);
-
-    color:#777;
-
-    margin-bottom:30px;
-
-    text-align:center;
-}
-
-
-/* =========================================================
-   GALLERY GRID
-========================================================= */
-
-.gallery-grid{
-
-    width:100%;
-
-    max-width:1400px;
-
-    display:grid;
-
-    grid-template-columns:
-        repeat(4,1fr);
-
-    gap:22px;
-
-    margin:0 auto;
-
-    padding:5px;
-
-    padding-bottom:100px;
-
-    min-height:max-content;
-
-    pointer-events:auto;
-}
-
-
-/* =========================================================
-   GALLERY CARD
-========================================================= */
-
-.gallery-card{
-
-    position:relative;
-
-    z-index:50;
-
-    width:100%;
-
-    height:
-        clamp(
-            220px,
-            38vh,
-            420px
-        );
-
-    border-radius:16px;
-
-    overflow:hidden;
-
-    background:#ddd;
-
-    cursor:pointer;
-
-    pointer-events:auto;
-
-    box-shadow:
-        0 8px 25px
-        rgba(0,0,0,.18);
-
-    transform:translateZ(0);
-
-    transition:
-        transform .3s ease,
-        box-shadow .3s ease;
-}
-
-
-.gallery-card:hover{
-
-    transform:
-        translateY(-7px);
-
-    box-shadow:
-        0 16px 35px
-        rgba(0,0,0,.28);
-}
-
-
-/* =========================================================
-   CARD IMAGE
-========================================================= */
-
-.gallery-card img{
-
-    width:100%;
-    height:100%;
-
-    object-fit:cover;
-
-    display:block;
-
-    pointer-events:none;
-
-    user-select:none;
-
-    -webkit-user-drag:none;
-
-    transition:
-        transform .5s ease;
-}
-
-
-.gallery-card:hover img{
-
-    transform:
-        scale(1.07);
-}
-
-
-/* =========================================================
-   CARD OVERLAY
-========================================================= */
-
-.card-overlay{
-
-    position:absolute;
-
-    inset:0;
-
-    z-index:2;
-
-    display:flex;
-
-    flex-direction:column;
-
-    justify-content:flex-end;
-
-    align-items:center;
-
-    padding-bottom:25px;
-
-    color:#fff;
-
-    text-align:center;
-
-    background:
-        linear-gradient(
-            to top,
-            rgba(0,0,0,.75),
-            rgba(0,0,0,0)
-            65%
-        );
-
-    pointer-events:none;
-}
-
-
-/* =========================================================
-   TAP ICON
-========================================================= */
-
-.tap-icon{
-
-    width:48px;
-    height:48px;
-
-    display:flex;
-
-    justify-content:center;
-    align-items:center;
-
-    margin-bottom:8px;
-
-    border-radius:50%;
-
-    background:
-        rgba(255,255,255,.18);
-
-    backdrop-filter:
-        blur(6px);
-
-    font-size:23px;
-
-    animation:
-        tapPulse 1.5s infinite;
-}
-
-
-@keyframes tapPulse{
-
-    0%{
-        transform:scale(1);
-    }
-
-    50%{
-        transform:scale(1.12);
-    }
-
-    100%{
-        transform:scale(1);
-    }
-}
-
-
-/* =========================================================
-   TAP TEXT
-========================================================= */
-
-.tap-text{
-
-    font-size:15px;
-
-    font-weight:bold;
-
-    letter-spacing:.4px;
-
-    text-shadow:
-        0 2px 6px
-        rgba(0,0,0,.8);
-}
-
-
-/* =========================================================
-   IMAGE MODAL
-========================================================= */
-
-.image-modal{
-
-    position:fixed;
-
-    inset:0;
-
-    width:100%;
-    height:100%;
-
-    display:none;
-
-    justify-content:center;
-    align-items:center;
-
-    padding:30px;
-
-    background:
-        rgba(0,0,0,.96);
-
-    z-index:999999;
-
-    pointer-events:auto;
-}
-
-
-.image-modal.active{
-    display:flex;
-}
-
-
-/* =========================================================
-   MODAL IMAGE
-========================================================= */
-
-.modal-image{
-
-    max-width:90vw;
-
-    max-height:86vh;
-
-    width:auto;
-    height:auto;
-
-    object-fit:contain;
-
-    border-radius:8px;
-
-    box-shadow:
-        0 20px 80px
-        rgba(0,0,0,.8);
-
-    animation:
-        modalZoom .3s ease;
-
-    user-select:none;
-
-    -webkit-user-drag:none;
-
-    pointer-events:auto;
-}
-
-
-@keyframes modalZoom{
-
-    from{
-        opacity:0;
-
-        transform:
-            scale(.8);
-    }
-
-    to{
-        opacity:1;
-
-        transform:
-            scale(1);
-    }
-}
-
-
-/* =========================================================
-   MODAL CLOSE
-========================================================= */
-
-.modal-close{
-
-    position:absolute;
-
-    top:20px;
-    right:25px;
-
-    width:52px;
-    height:52px;
-
-    border:0;
-
-    border-radius:50%;
-
-    background:
-        rgba(255,255,255,.15);
-
-    color:#fff;
-
-    font-size:34px;
-
-    line-height:1;
-
-    cursor:pointer;
-
-    z-index:10;
-
-    pointer-events:auto;
-
-    transition:
-        background .2s ease,
-        transform .2s ease;
-}
-
-
-.modal-close:hover{
-
-    background:
-        rgba(255,255,255,.3);
-
-    transform:
-        rotate(90deg);
-}
-
-
-/* =========================================================
-   MODAL PREVIOUS / NEXT
-========================================================= */
-
-.modal-prev,
-.modal-next{
-
-    position:absolute;
-
-    top:50%;
-
-    transform:
-        translateY(-50%);
-
-    width:58px;
-    height:58px;
-
-    border:none;
-
-    border-radius:50%;
-
-    background:
-        rgba(255,255,255,.15);
-
-    color:#fff;
-
-    font-size:40px;
-
-    line-height:1;
-
-    cursor:pointer;
-
-    z-index:10;
-
-    pointer-events:auto;
-
-    transition:
-        background .2s ease;
-}
-
-
-.modal-prev{
-    left:25px;
-}
-
-
-.modal-next{
-    right:25px;
-}
-
-
-.modal-prev:hover,
-.modal-next:hover{
-
-    background:
-        rgba(255,255,255,.3);
-}
-
-
-/* =========================================================
-   MODAL CAPTION
-========================================================= */
-
-.modal-caption{
-
-    position:absolute;
-
-    bottom:20px;
-    left:50%;
-
-    transform:
-        translateX(-50%);
-
-    max-width:80vw;
-
-    padding:
-        8px 18px;
-
-    border-radius:20px;
-
-    color:#fff;
-
-    background:
-        rgba(0,0,0,.55);
-
-    font-size:14px;
-
-    white-space:nowrap;
-
-    overflow:hidden;
-
-    text-overflow:ellipsis;
-
-    pointer-events:none;
-}
 
 
 /* =========================================================
@@ -781,134 +322,6 @@ body{
 
 @media(max-width:600px){
 
-    .gallery-content{
-
-        padding:
-            18px 12px 25px;
-
-        overflow-y:auto !important;
-
-        touch-action:pan-y;
-    }
-
-
-    .gallery-title{
-
-        font-size:2rem;
-
-        margin-bottom:3px;
-    }
-
-
-    .gallery-subtitle{
-
-        font-size:.9rem;
-
-        margin-bottom:15px;
-    }
-
-
-    .gallery-grid{
-
-        grid-template-columns:
-            repeat(2,1fr);
-
-        gap:10px;
-
-        padding:3px;
-
-        padding-bottom:100px;
-
-        min-height:max-content;
-    }
-
-
-    .gallery-card{
-
-        height:180px;
-
-        border-radius:12px;
-    }
-
-
-    .card-overlay{
-
-        padding-bottom:12px;
-    }
-
-
-    .tap-icon{
-
-        width:38px;
-        height:38px;
-
-        font-size:18px;
-
-        margin-bottom:4px;
-    }
-
-
-    .tap-text{
-
-        font-size:11px;
-    }
-
-
-    .modal-image{
-
-        max-width:96vw;
-
-        max-height:82vh;
-
-        border-radius:5px;
-    }
-
-
-    .modal-prev,
-    .modal-next{
-
-        width:44px;
-        height:44px;
-
-        font-size:30px;
-    }
-
-
-    .modal-prev{
-        left:7px;
-    }
-
-
-    .modal-next{
-        right:7px;
-    }
-
-
-    .modal-close{
-
-        width:44px;
-        height:44px;
-
-        top:10px;
-        right:10px;
-
-        font-size:28px;
-    }
-
-
-    .modal-caption{
-
-        bottom:10px;
-
-        font-size:12px;
-
-        max-width:70vw;
-
-        padding:
-            6px 12px;
-    }
-
-
     .music-control{
 
         width:44px;
@@ -956,7 +369,7 @@ img{
 
 <!-- =======================================================
      MUSIC CONTROL
-======================================================= -->
+========================================================= -->
 
 <button
     class="music-control"
@@ -964,7 +377,7 @@ img{
     aria-label="Play background music"
     title="Music"
 >
-    🔇
+    <i class="fa-solid fa-volume-xmark"></i>
 </button>
 
 
@@ -975,351 +388,159 @@ img{
 <div id="book">
 
 
-    <!-- ===================================================
-         FRONT COVER
-    ==================================================== -->
-
-    <div class="page cover">
-
-        <img
-            src="./img/cover.jpg"
-            alt="Magazine Cover"
-        >
-
-    </div>
-
-
-
-    <!-- ===================================================
-         GALLERY PAGE
-    ==================================================== -->
-
-    <div class="page gallery-page">
-
-        <div class="page-content gallery-content">
-
-
-            <h1 class="gallery-title">
-                Gallery
-            </h1>
-
-
-            <div class="gallery-subtitle">
-                Beautiful Memories
-            </div>
-
-
-            <div class="gallery-grid">
-
-
-                <!-- CARD 1 -->
-
-                <div
-                    class="gallery-card"
-                    data-image="./img/p2.jpg"
-                    data-title="Beautiful Memory"
-                >
-
-                    <img
-                        src="./img/p2.jpg"
-                        alt="Beautiful Memory"
-                    >
-
-                    <div class="card-overlay">
-
-                        <div class="tap-icon">
-                            👆
-                        </div>
-
-                        <div class="tap-text">
-                            Tap to View
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-
-                <!-- CARD 2 -->
-
-                <div
-                    class="gallery-card"
-                    data-image="./img/p3.jpg"
-                    data-title="Beautiful Memory"
-                >
-
-                    <img
-                        src="./img/p3.jpg"
-                        alt="Beautiful Memory"
-                    >
-
-                    <div class="card-overlay">
-
-                        <div class="tap-icon">
-                            👆
-                        </div>
-
-                        <div class="tap-text">
-                            Tap to View
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-
-                <!-- CARD 3 -->
-
-                <div
-                    class="gallery-card"
-                    data-image="./img/p4.jpg"
-                    data-title="Beautiful Memory"
-                >
-
-                    <img
-                        src="./img/p4.jpg"
-                        alt="Beautiful Memory"
-                    >
-
-                    <div class="card-overlay">
-
-                        <div class="tap-icon">
-                            👆
-                        </div>
-
-                        <div class="tap-text">
-                            Tap to View
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-
-                <!-- CARD 4 -->
-
-                <div
-                    class="gallery-card"
-                    data-image="./img/p5.jpg"
-                    data-title="Beautiful Memory"
-                >
-
-                    <img
-                        src="./img/p5.jpg"
-                        alt="Beautiful Memory"
-                    >
-
-                    <div class="card-overlay">
-
-                        <div class="tap-icon">
-                            👆
-                        </div>
-
-                        <div class="tap-text">
-                            Tap to View
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-
-                <!-- CARD 5 -->
-
-                <div
-                    class="gallery-card"
-                    data-image="./img/p6.jpg"
-                    data-title="Beautiful Memory"
-                >
-
-                    <img
-                        src="./img/p6.jpg"
-                        alt="Beautiful Memory"
-                    >
-
-                    <div class="card-overlay">
-
-                        <div class="tap-icon">
-                            👆
-                        </div>
-
-                        <div class="tap-text">
-                            Tap to View
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-
-                <!-- CARD 6 -->
-
-                <div
-                    class="gallery-card"
-                    data-image="./img/p7.jpg"
-                    data-title="Beautiful Memory"
-                >
-
-                    <img
-                        src="./img/p7.jpg"
-                        alt="Beautiful Memory"
-                    >
-
-                    <div class="card-overlay">
-
-                        <div class="tap-icon">
-                            👆
-                        </div>
-
-                        <div class="tap-text">
-                            Tap to View
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-
-                <!-- CARD 7 -->
-
-                <div
-                    class="gallery-card"
-                    data-image="./img/p8.jpg"
-                    data-title="Beautiful Memory"
-                >
-
-                    <img
-                        src="./img/p8.jpg"
-                        alt="Beautiful Memory"
-                    >
-
-                    <div class="card-overlay">
-
-                        <div class="tap-icon">
-                            👆
-                        </div>
-
-                        <div class="tap-text">
-                            Tap to View
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-
-                <!-- CARD 8 -->
-
-                <div
-                    class="gallery-card"
-                    data-image="./img/p9.jpg"
-                    data-title="Beautiful Memory"
-                >
-
-                    <img
-                        src="./img/p9.jpg"
-                        alt="Beautiful Memory"
-                    >
-
-                    <div class="card-overlay">
-
-                        <div class="tap-icon">
-                            👆
-                        </div>
-
-                        <div class="tap-text">
-                            Tap to View
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-
-                <!-- CARD 9 -->
-
-                <div
-                    class="gallery-card"
-                    data-image="./img/p10.jpg"
-                    data-title="Beautiful Memory"
-                >
-
-                    <img
-                        src="./img/p10.jpg"
-                        alt="Beautiful Memory"
-                    >
-
-                    <div class="card-overlay">
-
-                        <div class="tap-icon">
-                            👆
-                        </div>
-
-                        <div class="tap-text">
-                            Tap to View
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-
-                <!-- CARD 10 -->
-
-                <div
-                    class="gallery-card"
-                    data-image="./img/p11.jpg"
-                    data-title="Beautiful Memory"
-                >
-
-                    <img
-                        src="./img/p11.jpg"
-                        alt="Beautiful Memory"
-                    >
-
-                    <div class="card-overlay">
-
-                        <div class="tap-icon">
-                            👆
-                        </div>
-
-                        <div class="tap-text">
-                            Tap to View
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-            </div>
-
+    <!-- FRONT COVER -->
+    <div class="page --cover" data-density="hard">
+        <div class="page-container">
+            <img
+                src="./img/cover.jpg"
+                alt="Magazine Cover"
+            >
+
+           
         </div>
-
     </div>
 
 
+    <!-- PAGE 1 -->
+    <div class="page --cover" data-density="soft">
+        <div class="page-container">
+            <img
+                src="./img/p2.jpg"
+                alt="Page 1"
+            >
+            <span class="page-number">1</span>
+        </div>
+    </div>
 
-    <!-- ===================================================
-         BACK COVER
-    ==================================================== -->
 
-    <div class="page cover">
+    <!-- PAGE 2 -->
+    <div class="page --cover" data-density="soft">
+        <div class="page-container">
+            <img
+                src="./img/p3.jpg"
+                alt="Page 2"
+            >
+            <span class="page-number">2</span>
+        </div>
+    </div>
 
-        <img
-            src="./img/1stpage.jpg"
-            alt="Back Cover"
-        >
 
+    <!-- PAGE 3 -->
+    <div class="page  --cover" data-density="soft">
+        <div class="page-container">
+            <img
+                src="./img/p4.jpg"
+                alt="Page 3"
+            >
+            <span class="page-number">3</span>
+        </div>
+    </div>
+
+
+    <!-- PAGE 4 -->
+    <div class="page  --cover" data-density="soft">
+        <div class="page-container">
+            <img
+                src="./img/p5.jpg"
+                alt="Page 4"
+            >
+            <span class="page-number">4</span>
+        </div>
+    </div>
+
+
+    <!-- PAGE 5 -->
+    <div class="page  --cover" data-density="soft">
+        <div class="page-container">
+            <img
+                src="./img/p6.jpg"
+                alt="Page 5"
+            >
+            <span class="page-number">5</span>
+        </div>
+    </div>
+
+
+    <!-- PAGE 6 -->
+    <div class="page  --cover" data-density="soft">
+        <div class="page-container">
+            <img
+                src="./img/p7.jpg"
+                alt="Page 6"
+            >
+            <span class="page-number">6</span>
+        </div>
+    </div>
+
+
+    <!-- PAGE 7 -->
+    <div class="page  --cover" data-density="soft">
+        <div class="page-container">
+            <img
+                src="./img/p8.jpg"
+                alt="Page 7"
+            >
+            <span class="page-number">7</span>
+        </div>
+    </div>
+
+
+    <!-- PAGE 8 -->
+    <div class="page  --cover" data-density="soft">
+        <div class="page-container">
+            <img
+                src="./img/p9.jpg"
+                alt="Page 8"
+            >
+            <span class="page-number">8</span>
+        </div>
+    </div>
+
+
+    <!-- PAGE 9 -->
+    <div class="page  --cover" data-density="soft">
+        <div class="page-container">
+            <img
+                src="./img/p10.jpg"
+                alt="Page 9"
+            >
+            <span class="page-number">9</span>
+        </div>
+    </div>
+
+
+    <!-- PAGE 10 -->
+    <div class="page  --cover" data-density="soft">
+        <div class="page-container">
+            <img
+                src="./img/p11.jpg"
+                alt="Page 10"
+            >
+            <span class="page-number">10</span>
+        </div>
+    </div>
+
+
+    <!-- NEW PAGE 11 ADDED AT THE BOTTOM -->
+    <div class="page --cover" data-density="soft">
+        <div class="page-container">
+            <img
+                src="./img/p12.jpg"
+                alt="Page 11"
+            >
+            <span class="page-number">11</span>
+        </div>
+    </div>
+
+
+    <!-- BACK COVER -->
+    <div class="page --cover" data-density="hard">
+        <div class="page-container">
+            <img
+                src="./img/1stpage.jpg"
+                alt="Back Cover"
+            >
+        </div>
     </div>
 
 
@@ -1327,58 +548,7 @@ img{
 
 
 
-<!-- =======================================================
-     IMAGE MODAL
-======================================================= -->
 
-<div
-    class="image-modal"
-    id="imageModal"
->
-
-
-    <button
-        class="modal-close"
-        id="modalClose"
-        aria-label="Close"
-    >
-        ×
-    </button>
-
-
-    <button
-        class="modal-prev"
-        id="modalPrev"
-        aria-label="Previous Image"
-    >
-        ‹
-    </button>
-
-
-    <img
-        class="modal-image"
-        id="modalImage"
-        src=""
-        alt=""
-    >
-
-
-    <button
-        class="modal-next"
-        id="modalNext"
-        aria-label="Next Image"
-    >
-        ›
-    </button>
-
-
-    <div
-        class="modal-caption"
-        id="modalCaption"
-    ></div>
-
-
-</div>
 
 
 
@@ -1423,7 +593,7 @@ function startMusic(){
 
             musicPlaying = true;
 
-            musicControl.textContent = "🔊";
+            musicControl.innerHTML = '<i class="fa-solid fa-volume-high"></i>';
 
             musicControl.classList.add(
                 "playing"
@@ -1453,7 +623,7 @@ function stopMusic(){
 
     musicPlaying = false;
 
-    musicControl.textContent = "🔇";
+    musicControl.innerHTML = '<i class="fa-solid fa-volume-xmark"></i>';
 
     musicControl.classList.remove(
         "playing"
@@ -1549,25 +719,27 @@ const pageFlip =
 
         {
 
-            width:600,
+            width: window.innerWidth,
 
-            height:900,
+            height: window.innerHeight,
 
             size:"stretch",
 
             minWidth:280,
 
-            maxWidth:2000,
+            maxWidth:2500,
 
             minHeight:400,
 
-            maxHeight:3000,
+            maxHeight:3500,
 
             showCover:true,
 
             drawShadow:true,
 
-            flippingTime:900,
+            showPageCorners:true,
+
+            flippingTime:600,
 
             usePortrait:true,
 
@@ -1596,19 +768,30 @@ pageFlip.loadFromHTML(pages);
 
 
 /* =========================================================
-   AUTO FLIP
+   AUTO FLIP & LAGGING PREVENTIONS
 ========================================================= */
 
 let autoFlip = true;
+let isFlipping = false;
 
 const AUTO_TIME = 8000;
+
+pageFlip.on('flip', (e) => {
+    isFlipping = true;
+});
+
+pageFlip.on('changeState', (e) => {
+    if (e.data === 'read') {
+        isFlipping = false;
+    }
+});
 
 
 setInterval(
 
     () => {
 
-        if(!autoFlip){
+        if(!autoFlip || isFlipping){
 
             return;
 
@@ -1645,614 +828,6 @@ setInterval(
 
 
 /* =========================================================
-   GALLERY
-========================================================= */
-
-const galleryCards =
-    document.querySelectorAll(
-        ".gallery-card"
-    );
-
-
-const galleryImages =
-    Array.from(galleryCards)
-        .map(card => {
-
-            return {
-
-                image:
-                    card.dataset.image,
-
-                title:
-                    card.dataset.title
-
-            };
-
-        });
-
-
-/* =========================================================
-   MODAL
-========================================================= */
-
-const imageModal =
-    document.getElementById(
-        "imageModal"
-    );
-
-
-const modalImage =
-    document.getElementById(
-        "modalImage"
-    );
-
-
-const modalCaption =
-    document.getElementById(
-        "modalCaption"
-    );
-
-
-const modalClose =
-    document.getElementById(
-        "modalClose"
-    );
-
-
-const modalPrev =
-    document.getElementById(
-        "modalPrev"
-    );
-
-
-const modalNext =
-    document.getElementById(
-        "modalNext"
-    );
-
-
-let currentImage = 0;
-
-
-/* =========================================================
-   SHOW IMAGE
-========================================================= */
-
-function showImage(index){
-
-    if(!galleryImages.length){
-
-        return;
-
-    }
-
-
-    const item =
-        galleryImages[index];
-
-
-    modalImage.src =
-        item.image;
-
-
-    modalImage.alt =
-        item.title;
-
-
-    modalCaption.textContent =
-        item.title;
-
-}
-
-
-/* =========================================================
-   OPEN MODAL
-========================================================= */
-
-function openModal(index){
-
-    currentImage = index;
-
-    showImage(
-        currentImage
-    );
-
-    imageModal.classList.add(
-        "active"
-    );
-
-    autoFlip = false;
-
-}
-
-
-/* =========================================================
-   CLOSE MODAL
-========================================================= */
-
-function closeModal(){
-
-    imageModal.classList.remove(
-        "active"
-    );
-
-    modalImage.src = "";
-
-
-    clearTimeout(
-        window.resumeAutoFlip
-    );
-
-
-    window.resumeAutoFlip =
-        setTimeout(
-
-            () => {
-
-                autoFlip = true;
-
-            },
-
-            5000
-
-        );
-
-}
-
-
-/* =========================================================
-   NEXT IMAGE
-========================================================= */
-
-function nextImage(){
-
-    if(!galleryImages.length){
-
-        return;
-
-    }
-
-
-    currentImage++;
-
-
-    if(
-        currentImage >=
-        galleryImages.length
-    ){
-
-        currentImage = 0;
-
-    }
-
-
-    showImage(
-        currentImage
-    );
-
-}
-
-
-/* =========================================================
-   PREVIOUS IMAGE
-========================================================= */
-
-function previousImage(){
-
-    if(!galleryImages.length){
-
-        return;
-
-    }
-
-
-    currentImage--;
-
-
-    if(currentImage < 0){
-
-        currentImage =
-            galleryImages.length - 1;
-
-    }
-
-
-    showImage(
-        currentImage
-    );
-
-}
-
-
-/* =========================================================
-   GALLERY CARD CLICK
-========================================================= */
-
-galleryCards.forEach(
-
-    (card,index) => {
-
-
-        card.addEventListener(
-
-            "pointerdown",
-
-            function(event){
-
-                event.stopPropagation();
-
-                autoFlip = false;
-
-            },
-
-            true
-
-        );
-
-
-        card.addEventListener(
-
-            "pointerup",
-
-            function(event){
-
-                event.stopPropagation();
-
-            },
-
-            true
-
-        );
-
-
-        card.addEventListener(
-
-            "click",
-
-            function(event){
-
-                event.preventDefault();
-
-                event.stopPropagation();
-
-                openModal(index);
-
-            },
-
-            true
-
-        );
-
-
-        card.addEventListener(
-
-            "touchend",
-
-            function(event){
-
-                event.preventDefault();
-
-                event.stopPropagation();
-
-                openModal(index);
-
-            },
-
-            {
-
-                passive:false,
-
-                capture:true
-
-            }
-
-        );
-
-    }
-
-);
-
-
-/* =========================================================
-   GALLERY SCROLL PROTECTION
-========================================================= */
-
-const galleryContent =
-    document.querySelector(
-        ".gallery-content"
-    );
-
-
-if(galleryContent){
-
-
-    galleryContent.addEventListener(
-
-        "pointerdown",
-
-        function(event){
-
-            event.stopPropagation();
-
-        },
-
-        true
-
-    );
-
-
-    galleryContent.addEventListener(
-
-        "pointermove",
-
-        function(event){
-
-            event.stopPropagation();
-
-        },
-
-        true
-
-    );
-
-
-    galleryContent.addEventListener(
-
-        "touchstart",
-
-        function(event){
-
-            event.stopPropagation();
-
-        },
-
-        {
-
-            passive:true,
-
-            capture:true
-
-        }
-
-    );
-
-
-    galleryContent.addEventListener(
-
-        "touchmove",
-
-        function(event){
-
-            event.stopPropagation();
-
-        },
-
-        {
-
-            passive:true,
-
-            capture:true
-
-        }
-
-    );
-
-}
-
-
-/* =========================================================
-   MODAL CLOSE
-========================================================= */
-
-modalClose.addEventListener(
-
-    "click",
-
-    function(event){
-
-        event.preventDefault();
-
-        event.stopPropagation();
-
-        closeModal();
-
-    },
-
-    true
-
-);
-
-
-/* =========================================================
-   MODAL NEXT
-========================================================= */
-
-modalNext.addEventListener(
-
-    "click",
-
-    function(event){
-
-        event.preventDefault();
-
-        event.stopPropagation();
-
-        nextImage();
-
-    },
-
-    true
-
-);
-
-
-/* =========================================================
-   MODAL PREVIOUS
-========================================================= */
-
-modalPrev.addEventListener(
-
-    "click",
-
-    function(event){
-
-        event.preventDefault();
-
-        event.stopPropagation();
-
-        previousImage();
-
-    },
-
-    true
-
-);
-
-
-/* =========================================================
-   MODAL BACKGROUND CLOSE
-========================================================= */
-
-imageModal.addEventListener(
-
-    "click",
-
-    function(event){
-
-        if(
-            event.target ===
-            imageModal
-        ){
-
-            closeModal();
-
-        }
-
-    }
-
-);
-
-
-/* =========================================================
-   KEYBOARD
-========================================================= */
-
-document.addEventListener(
-
-    "keydown",
-
-    function(event){
-
-        if(
-            !imageModal.classList
-                .contains("active")
-        ){
-
-            return;
-
-        }
-
-
-        if(
-            event.key === "Escape"
-        ){
-
-            closeModal();
-
-        }
-
-
-        if(
-            event.key === "ArrowRight"
-        ){
-
-            nextImage();
-
-        }
-
-
-        if(
-            event.key === "ArrowLeft"
-        ){
-
-            previousImage();
-
-        }
-
-    }
-
-);
-
-
-/* =========================================================
-   MODAL SWIPE
-========================================================= */
-
-let modalTouchStartX = 0;
-
-
-imageModal.addEventListener(
-
-    "touchstart",
-
-    function(event){
-
-        modalTouchStartX =
-            event.changedTouches[0]
-                .screenX;
-
-    },
-
-    {
-        passive:true
-    }
-
-);
-
-
-imageModal.addEventListener(
-
-    "touchend",
-
-    function(event){
-
-        const modalTouchEndX =
-            event.changedTouches[0]
-                .screenX;
-
-
-        const distance =
-            modalTouchEndX -
-            modalTouchStartX;
-
-
-        if(
-            distance < -50
-        ){
-
-            nextImage();
-
-        }
-
-
-        if(
-            distance > 50
-        ){
-
-            previousImage();
-
-        }
-
-    },
-
-    {
-        passive:true
-    }
-
-);
-
-
-/* =========================================================
    RESIZE
 ========================================================= */
 
@@ -2267,41 +842,6 @@ window.addEventListener(
     }
 
 );
-
-
-/* =========================================================
-   PAUSE AUTO FLIP WHILE MOUSE
-   IS OVER GALLERY
-========================================================= */
-
-if(galleryContent){
-
-    galleryContent.addEventListener(
-
-        "mouseenter",
-
-        function(){
-
-            autoFlip = false;
-
-        }
-
-    );
-
-
-    galleryContent.addEventListener(
-
-        "mouseleave",
-
-        function(){
-
-            autoFlip = true;
-
-        }
-
-    );
-
-}
 
 </script>
 
