@@ -136,6 +136,22 @@ body{
     transition: opacity 0.3s ease;
 }
 
+/* Page Logo at the bottom center */
+.page-logo {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    
+    height: 24px;
+    width: auto;
+    object-fit: contain !important;
+    
+    z-index: 5;
+    pointer-events: none;
+    opacity: 0.85;
+}
+
 /* Page Number Badge */
 .page-number{
     position:absolute;
@@ -158,6 +174,8 @@ body{
     z-index:5;
 
     pointer-events:none;
+
+    margin-bottom:8vh;
 }
 
 
@@ -290,6 +308,47 @@ body{
 
 
 /* =========================================================
+   BOTTOM NOTICE BAR
+========================================================= */
+
+.bottom-info-note {
+    position: fixed;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    padding: 8px 18px;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 30px;
+
+    color: #fff;
+    font-size: 13px;
+    letter-spacing: 0.3px;
+
+    z-index: 99999;
+    pointer-events: none;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.bottom-info-note i {
+    color: #ffca28;
+    font-size: 14px;
+}
+
+.bottom-info-note span {
+    opacity: 0.9;
+}
+
+
+/* =========================================================
    TABLET
 ========================================================= */
 
@@ -331,6 +390,20 @@ body{
         bottom:12px;
 
         font-size:19px;
+    }
+
+    .bottom-info-note {
+        font-size: 11px;
+        padding: 6px 14px;
+        bottom: 10px;
+        left: 12px;
+        transform: none;
+        max-width: calc(100% - 70px);
+    }
+
+    .page-logo {
+        height: 18px;
+        bottom: 8px;
     }
 
 }
@@ -382,6 +455,16 @@ img{
 
 
 <!-- =======================================================
+     INFO NOTE (BOTTOM BAR)
+========================================================= -->
+
+<div class="bottom-info-note">
+    <i class="fa-solid fa-circle-info"></i>
+    <span>Tap screen for music • Swipe or tap corners to turn pages</span>
+</div>
+
+
+<!-- =======================================================
      FLIPBOOK
 ======================================================= -->
 
@@ -395,8 +478,7 @@ img{
                 src="./img/cover.jpg"
                 alt="Magazine Cover"
             >
-
-           
+            <img src="./img/logo.png" alt="Logo" class="page-logo">
         </div>
     </div>
 
@@ -408,6 +490,7 @@ img{
                 src="./img/p2.jpg"
                 alt="Page 1"
             >
+            <img src="./img/logo.png" alt="Logo" class="page-logo">
             <span class="page-number">1</span>
         </div>
     </div>
@@ -420,6 +503,7 @@ img{
                 src="./img/p3.jpg"
                 alt="Page 2"
             >
+            <img src="./img/logo.png" alt="Logo" class="page-logo">
             <span class="page-number">2</span>
         </div>
     </div>
@@ -432,6 +516,7 @@ img{
                 src="./img/p4.jpg"
                 alt="Page 3"
             >
+            <img src="./img/logo.png" alt="Logo" class="page-logo">
             <span class="page-number">3</span>
         </div>
     </div>
@@ -444,6 +529,7 @@ img{
                 src="./img/p5.jpg"
                 alt="Page 4"
             >
+            <img src="./img/logo.png" alt="Logo" class="page-logo">
             <span class="page-number">4</span>
         </div>
     </div>
@@ -456,6 +542,7 @@ img{
                 src="./img/p6.jpg"
                 alt="Page 5"
             >
+            <img src="./img/logo.png" alt="Logo" class="page-logo">
             <span class="page-number">5</span>
         </div>
     </div>
@@ -468,6 +555,7 @@ img{
                 src="./img/p7.jpg"
                 alt="Page 6"
             >
+            <img src="./img/logo.png" alt="Logo" class="page-logo">
             <span class="page-number">6</span>
         </div>
     </div>
@@ -480,6 +568,7 @@ img{
                 src="./img/p8.jpg"
                 alt="Page 7"
             >
+            <img src="./img/logo.png" alt="Logo" class="page-logo">
             <span class="page-number">7</span>
         </div>
     </div>
@@ -492,6 +581,7 @@ img{
                 src="./img/p9.jpg"
                 alt="Page 8"
             >
+            <img src="./img/logo.png" alt="Logo" class="page-logo">
             <span class="page-number">8</span>
         </div>
     </div>
@@ -504,6 +594,7 @@ img{
                 src="./img/p10.jpg"
                 alt="Page 9"
             >
+            <img src="./img/logo.png" alt="Logo" class="page-logo">
             <span class="page-number">9</span>
         </div>
     </div>
@@ -516,18 +607,20 @@ img{
                 src="./img/p11.jpg"
                 alt="Page 10"
             >
+            <img src="./img/logo.png" alt="Logo" class="page-logo">
             <span class="page-number">10</span>
         </div>
     </div>
 
 
-    <!-- NEW PAGE 11 ADDED AT THE BOTTOM -->
+    <!-- PAGE 11 -->
     <div class="page --cover" data-density="soft">
         <div class="page-container">
             <img
                 src="./img/p12.jpg"
                 alt="Page 11"
             >
+            <img src="./img/logo.png" alt="Logo" class="page-logo">
             <span class="page-number">11</span>
         </div>
     </div>
@@ -540,6 +633,7 @@ img{
                 src="./img/1stpage.jpg"
                 alt="Back Cover"
             >
+            <img src="./img/logo.png" alt="Logo" class="page-logo">
         </div>
     </div>
 
@@ -633,6 +727,26 @@ function stopMusic(){
 
 
 /* =========================================================
+   TOGGLE MUSIC (PLAY / MUTE)
+========================================================= */
+
+function toggleMusic(){
+
+    if(musicPlaying){
+
+        stopMusic();
+
+    }
+    else{
+
+        startMusic();
+
+    }
+
+}
+
+
+/* =========================================================
    MUSIC BUTTON
 ========================================================= */
 
@@ -647,16 +761,7 @@ musicControl.addEventListener(
         event.stopPropagation();
 
 
-        if(musicPlaying){
-
-            stopMusic();
-
-        }
-        else{
-
-            startMusic();
-
-        }
+        toggleMusic();
 
     }
 
@@ -664,34 +769,26 @@ musicControl.addEventListener(
 
 
 /* =========================================================
-   START MUSIC AFTER FIRST USER INTERACTION
+   SCREEN TAP TO PLAY / MUTE MUSIC
 ========================================================= */
-
-function firstInteraction(){
-
-    if(!musicPlaying){
-
-        startMusic();
-
-    }
-
-
-    document.removeEventListener(
-        "pointerdown",
-        firstInteraction,
-        true
-    );
-
-}
-
 
 document.addEventListener(
 
-    "pointerdown",
+    "click",
 
-    firstInteraction,
+    function(event){
 
-    true
+        /* Don't trigger if user clicked directly on the music button */
+        if(musicControl.contains(event.target)){
+
+            return;
+
+        }
+
+
+        toggleMusic();
+
+    }
 
 );
 
@@ -768,16 +865,21 @@ pageFlip.loadFromHTML(pages);
 
 
 /* =========================================================
-   AUTO FLIP & LAGGING PREVENTIONS
+   AUTO FLIP & MUSIC AUTO-PLAY ON FIRST FLIP
 ========================================================= */
 
 let autoFlip = true;
 let isFlipping = false;
 
-const AUTO_TIME = 8000;
+const AUTO_TIME = 5000;
 
 pageFlip.on('flip', (e) => {
     isFlipping = true;
+
+    // Start background music on the very first page flip if not playing
+    if (!musicPlaying) {
+        startMusic();
+    }
 });
 
 pageFlip.on('changeState', (e) => {
